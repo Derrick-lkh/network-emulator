@@ -1,0 +1,35 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+*.so
+*.dylib
+
+# Virtual environment
+venv/
+env/
+*.env
+
+# IDEs and Editors
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Python distribution files
+*.egg
+*.egg-info
+dist/
+build/
+
+# Test directories
+test_outputs/
+
+# Miscellaneous
+*.swp
