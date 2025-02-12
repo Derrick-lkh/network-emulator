@@ -27,12 +27,12 @@ A simple network emulator simulating communication between nodes through hubs an
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/network-emulator.git
+   git clone https://github.com/Derrick-lkh/network-emulator.git
    cd network-emulator
     ```
 2. Run the Hub:
    ```bash
-   python hub.p
+   python hub.py
     ```
 3. Run the Nodes:
    ```bash
