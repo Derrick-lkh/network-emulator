@@ -5,18 +5,18 @@ A simple network emulator simulating communication between nodes through hubs an
 
 ## Network Setup
 
-### Network A
-- **Node 1**: IP: `192.168.1.2`, MAC: `AA:BB`
-- **Node 2**: IP: `192.168.1.3`, MAC: `CC:DD`
-- **Hub**: IP: `192.168.1.1`
+### Network 0x1
+- **Hub A** 127.0.0.1 Port 5000
+- **Node 1**: IP: `0x1A`, MAC: `AA:BB`
 
-### Network B
-- **Node 3**: IP: `192.168.2.2`, MAC: `EE:FF`
-- **Hub**: IP: `192.168.2.1`
+### Network 0x2
+- **Hub B**: 127.0.0.1 Port 6000
+- **Node 2**: IP: `0x2A`, MAC: `CC:DD`
+- **Node 3**: IP: `0x2B`, MAC: `EE:FF`
 
 ### Router
-- **Interface 1** (Network A): IP: `192.168.1.254`
-- **Interface 2** (Network B): IP: `192.168.2.254`
+- **Interface 1** (R1 Network 0x1): IP: `0x11`
+- **Interface 2** (R2 Network 0x2): IP: `0x21`
 
 ## Features
 - **Node-to-Node Communication**: Direct message exchange within the same network.
@@ -30,12 +30,18 @@ A simple network emulator simulating communication between nodes through hubs an
    git clone https://github.com/Derrick-lkh/network-emulator.git
    cd network-emulator
     ```
-2. Run the Hub:
+2. Run the Router:
    ```bash
-   python hub.py
+   python router_main.py
+    ```
+2. Run the Hubs:
+   ```bash
+   python hub_A.py
+   python hub_B.py
     ```
 3. Run the Nodes:
    ```bash
-   python node-A,py # AA:BB
-   python node-B.py # CC:DD
+   python node_A,py
+   python node_B.py
+   python node_C.py
     ```
