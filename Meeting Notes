@@ -1,0 +1,19 @@
+# Frame
+# - src itsekf
+# - dest arp target
+# - len - arp req
+# - 
+
+
+# Frame
+# - (x) IP Layer src ip, dest ip
+# - - Protocol
+# - - - Data
+
+# ARP - IP??
+# Frame - src, dst mac, data
+
+# ASK PROF
+# Frame
+# type?
+# src, dst, type, len, "whois (0x1A -> N1)"

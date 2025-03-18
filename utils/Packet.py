@@ -1,8 +1,8 @@
 class Packet:
     def __init__(self, data, src_ip="", dest_ip="", protocol="0"):
         # Store IPs, MACs, protocol, and data length as strings
-        self.src_ip = src_ip if src_ip else "00"  # Default to "00" if src_ip is empty
-        self.dest_ip = dest_ip if dest_ip else "00"  # Default to "00" if dest_ip is empty
+        self.src_ip = src_ip
+        self.dest_ip = dest_ip
         self.protocol = protocol  # Keep protocol as string
         self.data = data  # Keep data as a string
         self.data_length = str(len(data))  # Store data length as a string
@@ -47,6 +47,7 @@ def main():
     x = Packet("MESSAGE", "0x1A", "0x2B", protocol="0")
     print(x.encode())
     encoded = x.encode()
+    # Packet.decode(encoded) 
     print(len(encoded))
     pass
 

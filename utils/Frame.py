@@ -45,7 +45,7 @@ class Frame:
     
     def __str__(self):
         """Returns a string representation of the packet."""
-        return f"Packet:\n" \
+        return f"Frame:\n" \
                f"  Source MAC: {self.src_mac}\n" \
                f"  Destination MAC: {self.dest_mac}\n" \
                f"  Data Length: {self.data_length}\n" \
@@ -55,17 +55,19 @@ class Frame:
 
 def main():
     # Test Functions - ignore
-    encoded_packet = Packet("MESSAGE", "0x1A", "0x2B", "0").encode()
+    encoded_packet = Packet("MESSAGE", "0x1A", "0x2B", "0").encode() # b'\x1a+\x00\x07MESSAGE'
+    
     frame = Frame("N1", "R1", encoded_packet)
     encoded_frame = frame.encode()
     print(encoded_frame)
     
     #
     incoming_frame = Frame.decode(encoded_frame)
+    incoming_frame.dest_mac #
     print(incoming_frame)
     incoming_packet = incoming_frame.get_packet()
     print(incoming_packet)
-    pass
+    
 
 
 if __name__ == "__main__":
