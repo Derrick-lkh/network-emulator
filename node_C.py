@@ -1,8 +1,11 @@
 from utils.node import Node, is_valid_mac_or_hex
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 if __name__ == "__main__":
-    node = Node(mac="ee:ff", ip="0x2B", hub_ip="127.0.0.1", hub_port=6000)
+    PORT = int(os.getenv("HUB_B_PORT", 0))
+    node = Node(mac="ee:ff", ip="0x2B", hub_ip="127.0.0.1", hub_port=PORT)
     while True:
         dest = input("Enter destination MAC or IP: ")
     

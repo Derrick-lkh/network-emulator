@@ -4,15 +4,15 @@ from utils.Packet import *
 
 
 class Router:
-    def __init__(self, host='127.0.0.1'):
+    def __init__(self, PORT_A, PORT_B, host='127.0.0.1'):
         # Network 0x1
         self.r1_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.r1_socket.connect((host, 5000))
+        self.r1_socket.connect((host, PORT_A))
         self.r1_socket.send(bytes.fromhex("dd:ee".replace(":", "")))
 
         # Network 0x2
         self.r2_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.r2_socket.connect((host, 6000))
+        self.r2_socket.connect((host, PORT_B))
         self.r2_socket.send(bytes.fromhex("dd:ff".replace(":", "")))
 
         self.clients = {}
