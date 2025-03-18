@@ -1,4 +1,8 @@
-from Packet import *
+if __name__ == "__main__":
+    from Packet import *
+    main()
+else:
+    from utils.Packet import *
 
 class Frame:
     def __init__(self, src_mac="", dest_mac="", data=""):
@@ -67,8 +71,3 @@ def main():
     print(incoming_frame)
     incoming_packet = incoming_frame.get_packet()
     print(incoming_packet)
-    
-
-
-if __name__ == "__main__":
-    main()

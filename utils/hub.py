@@ -2,6 +2,7 @@ import socket
 import threading
 import sys
 from utils.Packet import *
+from utils.Frame import *
 
 
 class Hub:
@@ -13,7 +14,7 @@ class Hub:
         print("[Hub] Listening for connections...")
 
     def handle_client(self, conn, addr):
-        mac = conn.recv(2).hex(":")
+        mac = conn.recv(2)
         self.clients[mac] = conn
         print(f"[Hub] Registered {mac} from {addr}")
 
@@ -24,7 +25,7 @@ class Hub:
                     break
                 print(data)
                 # Decode
-                packet = Packet.decode(data)
+                packet = Frame.decode(data)
                 src_mac = packet.src_mac
                 for client_mac, client_conn in self.clients.items():
                     if client_mac != src_mac:
