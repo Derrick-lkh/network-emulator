@@ -11,7 +11,7 @@ class Hub:
         self.server_socket.bind((host, port))
         self.server_socket.listen(5)
         self.clients = {}
-        print("[Hub] Listening for connections...")
+        print(f"[Hub on port {port}] Listening for connections...")
 
     def handle_client(self, conn, addr):
         mac = conn.recv(2)

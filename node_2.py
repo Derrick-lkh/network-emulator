@@ -1,4 +1,4 @@
-from utils.node import Node
+from utils.Node import Node
 import os
 from dotenv import load_dotenv
 load_dotenv()
