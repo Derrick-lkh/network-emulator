@@ -7,11 +7,21 @@ PROTOCOL_MAPPING = {
     "0": "ARP_REQUEST",
     "1": "ARP_REPLY",
     "2": "ICMP_REQUEST",
-    "2": "ICMP_REPLY",
-    "3": "TCPDATA"
+    "3": "ICMP_REPLY",
+    "4": "TCPDATA"
 }
 
 class Node:
+    """
+    Configure logic for Node (PC)
+    Protocol includes:
+        0 - ARP_REQUEST
+        1 - ARP_REPLY
+        2 - ICMP_REQUEST
+        3 - ICMP_REPLY
+        4 - TCPDATA
+    """
+    
     def __init__(self, mac, ip, gateway_ip, hub_ip, hub_port, SNIFF=False, ARP_TABLE=None, DISABLE_ANNOUNCE=False):
         self.mac = mac
         self.ip = ip
@@ -29,7 +39,7 @@ class Node:
 
     def send_TCP_data(self, dest_ip, data): # use for sending TCPDATA (plain message) protocol 
         # Check for dest type
-        payload_packet = Packet(data, self.ip, dest_ip, protocol="3")
+        payload_packet = Packet(data, self.ip, dest_ip, protocol="4")
         packet_encode = payload_packet.encode()
         # Create Frame
         dest_mac = self.NIC.ARP_TABLE.get(dest_ip, None) # Fetch ARP Table from NIC - PP if none
@@ -57,7 +67,19 @@ class Node:
         frame_encode = ARP_FRAME.encode()
         self.NIC.send(frame_encode) # Send out ARP Response
 
+    def send_icmp_request(self, target_ip):
+        ICMP_Request = f"ICMP Ping"
+        ICMP_PACKET = Packet(ICMP_Request, self.ip, target_ip, protocol="2")
+        dest_mac = self.NIC.ARP_TABLE.get(target_ip, None)
+        ICMP_FRAME = Frame(self.mac, dest_mac, ICMP_PACKET.encode())
+        frame_encode = ICMP_FRAME.encode()
+        self.NIC.send(frame_encode) # Send out ARP Response
+
     def announce_arp(self):
+        """
+        Announce self ARP info (own location)
+            - Sends out ARP reply with {self.ip}:{self.mac}
+        """
         ARP_REPLY = f"{self.ip}:{self.mac}"
         ARP_PACKET = Packet(ARP_REPLY, self.ip, self.gateway_ip, protocol="1")
         ARP_FRAME = Frame(self.mac, "FF", ARP_PACKET.encode()) # Broadcast
@@ -78,10 +100,11 @@ class Node:
                     packet_data = packet.data
                     protocol = packet.protocol
                     
-                    print(packet)
+                    # print(packet)
                     # Node Application Logic
                     # Configure logic for ARP Response
-                    if PROTOCOL_MAPPING.get(protocol, None) == "ARP_REQUEST":
+                    PROTOCOL_NAME = PROTOCOL_MAPPING.get(protocol, None)
+                    if PROTOCOL_NAME == "ARP_REQUEST":
                         # Craft ARP response packet
                         found_mac = self.NIC.ARP_TABLE.get(packet_data, None)
                         if found_mac:
@@ -91,13 +114,21 @@ class Node:
                             frame_encode = ARP_FRAME.encode()
                             self.NIC.send(frame_encode) # Send out ARP Response
                     # Handle ARP_RESPONSE
-                    elif PROTOCOL_MAPPING.get(protocol, None) == "ARP_REPLY":
+                    elif PROTOCOL_NAME == "ARP_REPLY":
                         ARP_IP, ARP_MAC = packet_data.split(":")
                         # Validate IP and MAC
                         self.NIC.update_ARP_table(ARP_IP, ARP_MAC)
                         print()
                         print("Updated ARP", self.NIC.ARP_TABLE)
-                    elif PROTOCOL_MAPPING.get(protocol, None) == "TCPDATA":
+                    elif PROTOCOL_NAME == "ICMP_REPLY":
+                        print(f"{src_mac} Replied to your ICMP")
+                    elif PROTOCOL_NAME == "ICMP_REQUEST":
+                        ICMP_REPLY = f"{self.ip}"
+                        ICMP_PACKET = Packet(ICMP_REPLY, self.ip, packet_src, protocol="3")
+                        ICMP_FRAME = Frame(self.mac, src_mac, ICMP_PACKET.encode())
+                        frame_encode = ICMP_FRAME.encode()
+                        self.NIC.send(frame_encode) # Send out ICMP Response
+                    elif PROTOCOL_NAME == "TCPDATA":
                         print("Incoming TCP Data")
                         print(packet)
 
