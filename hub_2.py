@@ -1,4 +1,4 @@
-from utils.Hub import *
+from utils.hub import *
 import os
 from dotenv import load_dotenv
 load_dotenv()

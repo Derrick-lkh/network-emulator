@@ -1,68 +1,94 @@
 import socket
 import threading
+import os
 from utils.Packet import *
+from utils.Frame import *
+from utils.NIC import *
+
 
 
 class Router:
-    def __init__(self, PORT_A, PORT_B, host='127.0.0.1'):
-        # Network 0x1
-        self.r1_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.r1_socket.connect((host, PORT_A))
-        self.r1_socket.send(bytes.fromhex("dd:ee".replace(":", "")))
-
-        # Network 0x2
-        self.r2_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.r2_socket.connect((host, PORT_B))
-        self.r2_socket.send(bytes.fromhex("dd:ff".replace(":", "")))
-
-        self.clients = {}
-        self.networks = {
-            "0x1": {
-                "0x1A": "aa:bb"
-            },
-            "0x2": {
-                "0x2A": "cc:dd",
-                "0x2B": "ee:ff"
-            }
+    def __init__(self, PORT_1, PORT_2, GATEWAY_1, GATEWAY_2, HUB_BASE_IP, mac1, ip1, mac2, ip2, ARP_TABLE_1=None, ARP_TABLE_2=None):
+        # Define the routing table as a dictionary
+        self.routing_table = {
+            "0x1": {"interface": "R1"},  
+            "0x2": {"interface": "R2"},  
         }
-        print("[Router] Listening for connections...")
 
-        threading.Thread(target=self.listen, args=("0x1",), daemon=True).start()
-        threading.Thread(target=self.listen, args=("0x2",), daemon=True).start()
+        self.R1 = NIC(mac1, ip1, gateway_ip=GATEWAY_1, hub_ip=HUB_BASE_IP, hub_port=PORT_1, ARP_TABLE=ARP_TABLE_1)
+        self.R2 = NIC(mac2, ip2, gateway_ip=GATEWAY_2, hub_ip=HUB_BASE_IP, hub_port=PORT_2, ARP_TABLE=ARP_TABLE_2)
 
-    def listen(self, network):
+        self.nics = {
+            "R1": self.R1,
+            "R2": self.R2,
+        }
+
+    def start(self):
+        print("[Router] Starting router...")
+        for nic_name, nic in self.nics.items():
+            # Start a thread for each NIC's listen method
+            threading.Thread(target=self.listen, args=(nic_name, nic), daemon=True).start()
+        print("[Router] All NICs are now listening.")
+
+    def listen(self, nic_name, nic):
+        """Listen for incoming packets from a specific NIC."""
         while True:
             try:
-                # Choose the socket based on the network
-                socket_map = {"0x1": self.r1_socket, "0x2": self.r2_socket}
-                current_socket = socket_map.get(network)
+                # Receive raw data from the NIC
+                data = nic.listen()  
+                if data:
+                    print("*" * 50)
+                    decoded_frame = Frame.decode(data)
+                    print(decoded_frame)
+                    packet = Packet.decode(decoded_frame.data)
+                    print(f"[Router] Packet received on {nic_name}: \n{packet}")
+                    print("*" * 50)
 
-                # Receive data from the respective socket
-                if current_socket is None:
-                    break
 
-                data = current_socket.recv(512)
-                if not data:
-                    break
-
-                # Decode the packet
-                decoded_packet = Packet.decode(data)
-                dest_ip = decoded_packet.dest_ip
-
-                # If destination IP does not match the current network, forward it
-                if network not in dest_ip:
-                    print(decoded_packet)
-                    target_network = "0x2" if network == "0x1" else "0x1"
-                    target_mac = self.networks.get(target_network, {}).get(dest_ip)
-
-                    if target_mac:
-                        decoded_packet.dest_mac = target_mac
-                        target_socket = socket_map.get(target_network)
-                        if target_socket:
-                            target_socket.send(decoded_packet.encode())
+                    # If the packet is meant for the router
+                    if packet.dest_ip == nic.ip:
+                        print(f"[Router] Packet is for this router: \n{packet}")
+                    # Otherwise, forward the packet
                     else:
-                        print(f"Destination MAC for {dest_ip} not found in network {target_network}.")
-
-            except (socket.error, Exception) as e:
-                print(f"Error occurred in {network}: {e}")
+                        self.route_packet(packet, incoming_nic=nic_name)
+            except Exception as e:
+                print(f"[Router] Error while listening on {nic_name}: {e}")
                 break
+
+    def route_packet(self, packet, incoming_nic):
+        """Route a packet based on the routing table."""
+        destination = packet.dest_ip
+        print(f"[Router] Packet received on NIC {incoming_nic} for destination {destination}")
+        route = None
+
+        for network, network_info in self.routing_table.items():
+            if destination.startswith(network):
+                route = network_info
+                break
+        
+        if route is None:
+            print(f"[Router] No route found for destination {destination}. Packet dropped.")
+            return
+        
+        outgoing_interface = route["interface"]
+        if outgoing_interface == incoming_nic:
+            print(f"[Router] Packet for {destination} is already on the correct NIC {incoming_nic}. Handling locally")
+            nic = self.nics[incoming_nic]
+
+        else:
+            print(f"[Router] Forwarding packet for {destination} via via NIC {outgoing_interface}")
+            nic = self.nics[outgoing_interface]
+            print(nic)
+        packet_encode = packet.encode()
+        dest_mac = nic.ARP_TABLE.get(destination, None)
+        print(destination)
+        print(dest_mac)
+        if dest_mac is None:
+            print(f"[Router] MAC address for destination {destination} not found in ARP table. Packet dropped.")
+            return
+        payload_frame = Frame(nic.mac, dest_mac, packet_encode)
+        frame_encode = payload_frame.encode()
+        nic.send(frame_encode)
+        print(f"[Router {nic.mac}] Forwarded frame to [Node {dest_mac}]")
+        return
+

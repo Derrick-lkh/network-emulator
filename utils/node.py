@@ -22,11 +22,13 @@ class Node:
         4 - TCPDATA
     """
     
-    def __init__(self, mac, ip, gateway_ip, hub_ip, hub_port, SNIFF=False, ARP_TABLE=None, DISABLE_ANNOUNCE=False):
+    def __init__(self, mac, ip, gateway_ip, hub_ip, hub_port, SNIFF=False, ARP_TABLE=None, DISABLE_ANNOUNCE=False, SPOOF=False, FIREWALL=None):
         self.mac = mac
         self.ip = ip
         self.gateway_ip = gateway_ip
         self.SNIFF = SNIFF
+        self.SPOOF = SPOOF  
+        self.FIREWALL = FIREWALL
         self.NIC = NIC(mac, ip, gateway_ip, hub_ip, hub_port, ARP_TABLE)
         if not DISABLE_ANNOUNCE:
             self.announce_arp()
@@ -37,15 +39,20 @@ class Node:
         else:
             threading.Thread(target=self.listen, daemon=True).start()
 
-    def send_TCP_data(self, dest_ip, data): # use for sending TCPDATA (plain message) protocol 
-        # Check for dest type
-        payload_packet = Packet(data, self.ip, dest_ip, protocol="4")
+    def send_TCP_data(self, dest_ip, data, spoof_ip): # use for sending TCPDATA (plain message) protocol 
+        if self.SPOOF:
+            if spoof_ip:
+                payload_packet = Packet(data, spoof_ip, dest_ip, protocol="4")
+        else:
+            payload_packet = Packet(data, self.ip, dest_ip, protocol="4")
         packet_encode = payload_packet.encode()
         # Create Frame
         dest_mac = self.NIC.ARP_TABLE.get(dest_ip, None) # Fetch ARP Table from NIC - PP if none
+
+        # If mac not in ARP table, send to default gateway
         if dest_mac is None:
-            print(f"Mac Destination not found")
-            return
+            dest_mac = self.NIC.ARP_TABLE.get(self.gateway_ip, None) # Fetch ARP Table from NIC - PP if none
+            print(f"Mac Destination not found. Sending to Gateway")
         payload_frame = Frame(self.mac, dest_mac, packet_encode)
         frame_encode = payload_frame.encode()
         self.NIC.send(frame_encode)
@@ -91,9 +98,10 @@ class Node:
             try:
                 # Takes control of NIC Listening - for attack/ sniffing
                 data = self.NIC.listen() # Application layer sniff
-                if data:
+                if data:                        
                     # Decode
                     decoded_packet = Frame.decode(data)
+                    print(decoded_packet)
                     packet = Packet.decode(decoded_packet.data)
                     src_mac = decoded_packet.src_mac
                     packet_src = packet.src_ip
