@@ -1,3 +1,5 @@
+from utils.constants import PROTOCOL_MAPPING
+
 class Packet:
     def __init__(self, data, src_ip="", dest_ip="", protocol="0"):
         # Store IPs, MACs, protocol, and data length as strings
@@ -30,7 +32,36 @@ class Packet:
         return Packet(data, src_ip, dest_ip, protocol)
     
     def validate_packet(self) -> bool:
-        return True
+        """
+        - IP addresses must be valid hexadecimal strings in range
+        - Protocol must be either these values
+            "0" - ARP_REQUEST
+            "1" - ARP_REPLY
+            "2" - ICMP_REQUEST
+            "3" - ICMP_REPLY
+            "4" - TCPDATA
+            
+        - Data length must match actual data and be representable in 1 byte
+        - Data must be non-empty and encodable
+        """
+
+        src_ip_sanitised = int(self.src_ip, 16)
+        dest_ip_sanitised = int(self.dest_ip, 16)
+        data_len  = int(self.data_length)
+        
+        invalid_conditions = [
+            not self.src_ip.startswith("0x"),
+            not self.dest_ip.startswith("0x"),
+            src_ip_sanitised not in range(256),
+            dest_ip_sanitised not in range(256),
+            self.protocol not in PROTOCOL_MAPPING,
+            not self.data or len(self.data) == 0,
+            data_len != len(self.data),
+            data_len not in range(256),
+        ]
+            
+        return not any(invalid_conditions)
+        
 
     def __str__(self):
         """Returns a string representation of the packet."""
