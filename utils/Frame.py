@@ -1,5 +1,6 @@
 if __name__ == "__main__":
     from Packet import *
+    import os
     main()
 else:
     from utils.Packet import *
@@ -45,7 +46,35 @@ class Frame:
         return Packet.decode(self.data)
     
     def validate_frame(self) -> bool:
-        return True
+        """
+        - Checks if source MAC address is present and not empty
+        - Checks if destination MAC address is present and not empty
+        - Verifies that the stored data length matches the actual length of the data
+        - Ensures the data length isn't negative
+        - Confirms that data isn't None
+        - Validates that MAC addresses meet a minimum length requirement
+        - Ensures the frame doesn't exceed a maximum size
+        """
+
+        MAX_FRAME_SIZE = int(os.getenv(MAX_FRAME_SIZE))
+        MIN_MAC_LENGTH = int(os.getenv(MIN_MAC_LENGTH))
+
+        invalid_conditions = [
+            not self.src_mac,                    # Source MAC is empty/None
+            not self.dest_mac,                   # Dest MAC is empty/None
+            self.data is None,                   # Data is None
+            self.data_length != len(self.data),  # Data length mismatch
+            self.data_length < 0,                # Negative data length
+            self.data_length > MAX_FRAME_SIZE,   # Exceeds max size
+            len(self.src_mac) < MIN_MAC_LENGTH,  # Source MAC too short
+            len(self.dest_mac) < MIN_MAC_LENGTH, # Dest MAC too short
+            self.src_mac == self.dest_mac,       # Source and dest MACs identical
+            not isinstance(self.src_mac, str),   # Source MAC not a string
+            not isinstance(self.dest_mac, str),  # Dest MAC not a string
+        ]
+
+        return not any(invalid_conditions)
+    
     
     def __str__(self):
         """Returns a string representation of the packet."""
