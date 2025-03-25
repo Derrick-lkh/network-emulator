@@ -6,3 +6,8 @@ PROTOCOL_MAPPING = {
     "3": "ICMP_REPLY",
     "4": "TCPDATA"
 }
+FRAME_MAPPING = {
+    "A": "ARP",
+    "B": "ICMP",
+    "C": "IPV4"
+}

@@ -89,6 +89,7 @@ class Router:
         payload_frame = Frame(nic.mac, dest_mac, packet_encode)
         frame_encode = payload_frame.encode()
         nic.send(frame_encode)
+        print(payload_frame)
         print(f"[Router {nic.mac}] Forwarded frame to [Node {dest_mac}]")
         return
 

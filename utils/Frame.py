@@ -5,12 +5,24 @@ if __name__ == "__main__":
 else:
     from utils.Packet import *
 
+"""
+Frame Type in Frame (1 byte)
+A - ARP
+# B - ICMP
+C - IPV4
+
+# ARP
+R:0x1A
+A:0x1A:N1
+"""
+
 class Frame:
-    def __init__(self, src_mac="", dest_mac="", data=""):
+    def __init__(self, src_mac="", dest_mac="", data="", frame_type="C"):
         self.src_mac = src_mac
         self.dest_mac = dest_mac
         self.data = data
         self.data_length = len(data)
+        self.frame_type = frame_type
     
     def encode(self) -> str:
         # Converts Object to Bytes
@@ -37,12 +49,13 @@ class Frame:
         # Step 2: Decode each component
         src_mac = encoded_src_mac.decode("utf-8")
         dest_mac = encoded_dest_mac.decode("utf-8")
-        data_length = encoded_data_length[0]  # Since data_length is 1 byte, just take the first byte
+        # data_length = encoded_data_length[0]  # Since data_length is 1 byte, just take the first byte
 
         # Return the decoded result (if needed)
         return Frame(src_mac, dest_mac, encoded_data)
 
     def get_packet(self) -> Packet:
+        # Check if data is Packet class
         return Packet.decode(self.data)
     
     def validate_frame(self) -> bool:
@@ -87,6 +100,8 @@ class Frame:
     
 
 def main():
+    # print(Frame.decode(b'R2N3\x07\x1a+\x00\x03123'))
+    return
     # Test Functions - ignore
     encoded_packet = Packet("MESSAGE", "0x1A", "0x2B", "0").encode() # b'\x1a+\x00\x07MESSAGE'
     

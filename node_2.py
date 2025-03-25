@@ -1,4 +1,4 @@
-from utils.node import Node
+from utils.Node import Node
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -13,7 +13,7 @@ if __name__ == "__main__":
         "0x2B": "N3"
     }
     spoof_flag = False
-    node = Node(mac="N2", ip="0x2A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, SPOOF=spoof_flag)
+    node = Node(mac="N2", ip="0x2A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE)
     node.run()
     while True:
         dest = input("Enter destination MAC or IP: ")

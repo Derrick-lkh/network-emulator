@@ -1,4 +1,4 @@
-from utils.node import Node
+from utils.Node import Node
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -10,8 +10,8 @@ if __name__ == "__main__":
     ARP_TABLE = {
         "0x11": "R1"
     }
-    spoof_flag = False
-    node = Node(mac="N1", ip="0x1A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, SPOOF=spoof_flag)
+    spoof_flag = True
+    node = Node(mac="N1", ip="0x1A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE)
     node.run()
 
     while True:
