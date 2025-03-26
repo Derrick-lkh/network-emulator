@@ -34,7 +34,7 @@ class VPNClient:
 
         inner_packet = Packet(data, self.vnic_ip, dest_ip, "4")
         if not inner_packet.validate_packet():
-            return ValueError("Invalid packet")
+            raise ValueError("Invalid packet")
 
         inner_packet_str = (
             f"{inner_packet.src_ip}|{inner_packet.dst_ip}|{inner_packet.data}"
