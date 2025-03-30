@@ -30,7 +30,8 @@ class Frame:
         encoded_dest_mac = self.dest_mac.encode("utf-8")     # Convert destination MAC to bytes
         encoded_data = self.data # alr encoded
         encoded_data_length = self.data_length.to_bytes(1, byteorder='big')
-        return encoded_src_mac + encoded_dest_mac + encoded_data_length + encoded_data
+        encoded_frame_type = self.frame_type.encode("utf-8") 
+        return encoded_src_mac + encoded_dest_mac + encoded_frame_type + encoded_data_length + encoded_data
 
     @staticmethod
     def decode(raw_data) -> "Frame":
@@ -39,20 +40,23 @@ class Frame:
         src_mac_len = 2  # Adjust length based on the actual byte length of src_mac
         dest_mac_len = 2  # Adjust length based on the actual byte length of dest_mac
         data_length_len = 1  # 1 byte for data length (adjusted)
-        
+        frame_type_len = 1
         # Extract each component from the encoded data
         encoded_src_mac = raw_data[:src_mac_len]
         encoded_dest_mac = raw_data[src_mac_len:src_mac_len+dest_mac_len]
-        encoded_data_length = raw_data[src_mac_len+dest_mac_len:src_mac_len+dest_mac_len+data_length_len]
-        encoded_data = raw_data[src_mac_len+dest_mac_len+data_length_len:]
+        encoded_frame_type = raw_data[src_mac_len+dest_mac_len:src_mac_len+dest_mac_len+frame_type_len]
+        encoded_data_length = raw_data[src_mac_len+dest_mac_len+frame_type_len:src_mac_len+dest_mac_len+frame_type_len+data_length_len]
+        encoded_data = raw_data[src_mac_len+dest_mac_len+frame_type_len+data_length_len:]
 
         # Step 2: Decode each component
         src_mac = encoded_src_mac.decode("utf-8")
         dest_mac = encoded_dest_mac.decode("utf-8")
+        frame_type = encoded_frame_type.decode("utf-8")
+        data = encoded_data.decode("utf-8")
         # data_length = encoded_data_length[0]  # Since data_length is 1 byte, just take the first byte
 
         # Return the decoded result (if needed)
-        return Frame(src_mac, dest_mac, encoded_data)
+        return Frame(src_mac, dest_mac, data, frame_type=frame_type)
 
     def get_packet(self) -> Packet:
         # Check if data is Packet class
@@ -95,7 +99,8 @@ class Frame:
                f"  Source MAC: {self.src_mac}\n" \
                f"  Destination MAC: {self.dest_mac}\n" \
                f"  Data Length: {self.data_length}\n" \
-               f"  Data: {self.data}"
+               f"  Data: {self.data}\n" \
+               f"  Frame Type: {self.frame_type}"
 
     
 

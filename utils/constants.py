@@ -8,6 +8,10 @@ PROTOCOL_MAPPING = {
 }
 FRAME_MAPPING = {
     "A": "ARP",
-    "B": "ICMP",
     "C": "IPV4"
+}
+
+FRAME_TYPE = {
+    "ARP": "A",
+    "IPV4": "C"
 }

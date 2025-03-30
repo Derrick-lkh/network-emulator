@@ -18,7 +18,7 @@ class NodeInputHandler:
         if self.firewall_flag:
             self.menu_actions['3'] = self.menu_actions['2']
             self.menu_actions['2'] = {"msg": "Manage Firewall Rules", "action": self.manage_firewall}
-
+        
     def run(self):
         while True:
             print("Enter the corresponding number:")
