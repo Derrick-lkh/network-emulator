@@ -2,6 +2,7 @@ from utils.Packet import *
 from utils.Frame import *
 from utils.NIC import *
 from utils.VPNClient import *
+from utils.Firewall import *
 import threading
 from utils.constants import PROTOCOL_MAPPING, FRAME_MAPPING
 
@@ -28,7 +29,10 @@ class Node:
         self.ip = ip
         self.gateway_ip = gateway_ip
         self.SNIFF = SNIFF
-        self.FIREWALL = FIREWALL
+        if FIREWALL:
+            self.firewall = Firewall(mode=FIREWALL)
+        else:
+            self.firewall = None
         self.NIC = NIC(mac, ip, gateway_ip, hub_ip, hub_port, ARP_TABLE)
         self.VPN_CTRL: VPN = False
         
@@ -55,9 +59,9 @@ class Node:
 
     def send_TCP_data(self, dest_ip, data, spoof_ip=False): # use for sending TCPDATA (plain message) protocol 
         if spoof_ip:
-            payload_packet = Packet(data, spoof_ip, dest_ip, protocol="0")
+            payload_packet = Packet(data, spoof_ip, dest_ip, protocol="4")
         else:
-            payload_packet = Packet(data, self.ip, dest_ip, protocol="0")
+            payload_packet = Packet(data, self.ip, dest_ip, protocol="4")
         packet_encode = payload_packet.encode()
         # Create Frame
         dest_mac = self.NIC.ARP_TABLE.get(dest_ip, None) # Fetch ARP Table from NIC - PP if none
@@ -102,6 +106,7 @@ class Node:
             - Sends out ARP reply with {self.ip}:{self.mac}
         """
         ARP_REPLY = f"{self.ip}:{self.mac}"
+        # change ARP logic, remove packet
         ARP_PACKET = Packet(ARP_REPLY, self.ip, self.gateway_ip, protocol="1")
         ARP_FRAME = Frame(self.mac, "FF", ARP_PACKET.encode()) # Broadcast
         frame_encode = ARP_FRAME.encode()
@@ -125,9 +130,12 @@ class Node:
                         # ICMP or TCPDATA (MESSAGE)
                         packet = Packet.decode(frame_data)
                         packet_src = packet.src_ip
+                        if self.firewall and not self.firewall.check_packet(packet):
+                            print(f"Blocked packet from {packet_src}")
+                            continue # skip blocked packet
                         packet_data = packet.data
                         protocol = packet.protocol
-                        print(packet)
+                        # print(packet)
                         # Node Application Logic
                         # Configure logic for ARP Response
                         PROTOCOL_NAME = PROTOCOL_MAPPING.get(protocol, None)
