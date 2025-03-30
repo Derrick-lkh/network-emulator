@@ -22,10 +22,10 @@ if __name__ == "__main__":
     while True:
         user_input = input("Enter a command: ")
         if user_input == "1":
-            node.send_icmp_request("0x2A")
+            node.send_icmp_request("0x1A")
         elif user_input == "2":
             while True:
                 print("sending ping")
-                node.send_icmp_request("0x2A")
+                node.send_icmp_request("0x1A")
                 time.sleep(2)
         pass
