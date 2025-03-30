@@ -10,13 +10,6 @@ class Node:
     """
     Configure logic for Node (PC)
     # Protocol includes:
-    #     0 - ARP_REQUEST
-    #     1 - ARP_REPLY
-    #     2 - ICMP_REQUEST
-    #     3 - ICMP_REPLY
-    #     4 - TCPDATA
-    # todo
-    - reclassify protocol
     0 - TCPDATA
     1 - ICMP
 
@@ -141,7 +134,7 @@ class Node:
                 if data:                        
                     # Decode
                     decoded_packet = Frame.decode(data)
-                    print(decoded_packet)
+                    # print(decoded_packet)
 
                     src_mac = decoded_packet.src_mac
                     frame_type = decoded_packet.frame_type
@@ -155,9 +148,7 @@ class Node:
                         if self.firewall and not self.firewall.check_packet(packet):
                             print(f"Blocked packet from {packet_src}")
                             continue # skip blocked packet
-                        packet_data = packet.data
                         protocol = packet.protocol
-                        # print(packet)
                         # Node Application Logic
                         # Configure logic for ARP Response
                         PROTOCOL_NAME = PROTOCOL_MAPPING.get(protocol, None)

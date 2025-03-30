@@ -19,13 +19,14 @@ if __name__ == "__main__":
     node = Node(mac="N5", ip="0x2D", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, DISABLE_ANNOUNCE=True)
     time.sleep(2) # Await Node creation complete
     node.run()
+    ICMP_IP = input("Enter an IP to ping (e.g. 0x1A): ")
     while True:
-        user_input = input("Enter a command: ")
+        user_input = input("Enter a command: (1) Ping once (2) Ping on loop")
         if user_input == "1":
-            node.send_icmp_request("0x1A")
+            node.send_icmp_request(ICMP_IP)
         elif user_input == "2":
             while True:
                 print("sending ping")
-                node.send_icmp_request("0x1A")
+                node.send_icmp_request(ICMP_IP)
                 time.sleep(2)
         pass
