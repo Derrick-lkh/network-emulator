@@ -52,11 +52,10 @@ class Frame:
         src_mac = encoded_src_mac.decode("utf-8")
         dest_mac = encoded_dest_mac.decode("utf-8")
         frame_type = encoded_frame_type.decode("utf-8")
-        data = encoded_data.decode("utf-8")
         # data_length = encoded_data_length[0]  # Since data_length is 1 byte, just take the first byte
 
         # Return the decoded result (if needed)
-        return Frame(src_mac, dest_mac, data, frame_type=frame_type)
+        return Frame(src_mac, dest_mac, encoded_data, frame_type=frame_type)
 
     def get_packet(self) -> Packet:
         # Check if data is Packet class

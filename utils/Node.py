@@ -4,7 +4,7 @@ from utils.NIC import *
 from utils.VPNClient import *
 from utils.Firewall import *
 import threading
-from utils.constants import PROTOCOL_MAPPING, FRAME_MAPPING, FRAME_TYPE
+from utils.constants import PROTOCOL_MAPPING, PROTOCOL_TYPE, FRAME_MAPPING, FRAME_TYPE
 
 class Node:
     """
@@ -68,9 +68,9 @@ class Node:
 
     def send_TCP_data(self, dest_ip, data, spoof_ip=False): # use for sending TCPDATA (plain message) protocol 
         if spoof_ip:
-            payload_packet = Packet(data, spoof_ip, dest_ip, protocol="4")
+            payload_packet = Packet(data, spoof_ip, dest_ip, protocol=PROTOCOL_TYPE.get("TCPDATA"))
         else:
-            payload_packet = Packet(data, self.ip, dest_ip, protocol="4")
+            payload_packet = Packet(data, self.ip, dest_ip, protocol=PROTOCOL_TYPE.get("TCPDATA"))
         packet_encode = payload_packet.encode()
         # Create Frame
         dest_mac = self.NIC.ARP_TABLE.get(dest_ip, None) # Fetch ARP Table from NIC - PP if none
@@ -120,7 +120,7 @@ class Node:
     #################################
     def send_icmp_request(self, target_ip):
         ICMP_Request = f"ICMP Ping"
-        ICMP_PACKET = Packet(ICMP_Request, self.ip, target_ip, protocol="2")
+        ICMP_PACKET = Packet(ICMP_Request, self.ip, target_ip, protocol=PROTOCOL_TYPE.get("ICMP"))
         dest_mac = self.NIC.ARP_TABLE.get(target_ip, None)
         ICMP_FRAME = Frame(self.mac, dest_mac, ICMP_PACKET.encode())
         frame_encode = ICMP_FRAME.encode()
@@ -157,7 +157,6 @@ class Node:
                         if PROTOCOL_NAME == "TCPDATA":
                             print("Incoming TCP Data")
                             print(packet)
-                        
                         #
                         elif PROTOCOL_NAME == "ICMP":
                             # ICMP_TYPE = packet.data[0]
@@ -174,17 +173,18 @@ class Node:
                     # Move to data layer
                     elif FRAME_NAME == "ARP":
                         # Craft ARP response packet
-                        ARP_TYPE = frame_data[0]
+                        decoded_frame_data = frame_data.decode("utf-8")
+                        ARP_TYPE = decoded_frame_data[0]
                         
                         print(f"ARP PACKET {ARP_TYPE}")
                         if ARP_TYPE == "R": # Incoming req
                             ## REQUEST
-                            _, ARP_IP = frame_data.split(":")
+                            _, ARP_IP = decoded_frame_data.split(":")
                             if ARP_IP == self.ip:
                                 self.send_arp_reply(ARP_IP, self.mac, src_mac)
                         elif ARP_TYPE == "A": # Receive answer
                             ## Answer
-                            _, ARP_IP, ARP_MAC = frame_data.split(":")
+                            _, ARP_IP, ARP_MAC = decoded_frame_data.split(":")
                             # Validate IP and MAC
                             self.NIC.update_ARP_table(ARP_IP, ARP_MAC)
                             print()
