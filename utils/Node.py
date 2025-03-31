@@ -106,7 +106,7 @@ class Node:
 
             self.NIC.send(frame_encoded)
             print(
-                f"[Node {self.mac}] Sent VPN tunnel packet to {self.VPN_CTRL.vpn_gateway} for destination {dest_ip}: {data}"
+                f"[Node {self.mac}] Sent VPN tunnel packet to {self.VPN_CTRL.vpn_gateway} for destination {final_dest_ip}: {data}"
             )
         except Exception as e:
             print(f"Failed to send VPN tunnel packet: {str(e)}")
