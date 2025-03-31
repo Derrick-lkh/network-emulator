@@ -1,5 +1,6 @@
 from utils.Packet import *
 from cryptography.fernet import Fernet
+from ipaddress import ip_address
 import base64
 
 
@@ -13,12 +14,17 @@ class VPNClient:
             secret (str): Secret key for encryption
         """
 
+        for ip in (vpn_gateway, vnic_ip, nic_ip):
+            try:
+                ip_address(ip)
+            except ValueError:
+                raise ValueError(f"Invalid IP address: {ip}")
+
         self.vpn_gateway = vpn_gateway
         self.vnic_ip = vnic_ip
         self.nic_ip = nic_ip
-        self.cipher = Fernet(
-            base64.urlsafe_b64encode(secret.encode()[:32].ljust(32, b"\0"))
-        )
+        key_bytes = secret.encode()[:32].ljust(32, b"\0")
+        self.cipher = Fernet(base64.urlsafe_b64encode(key_bytes))
 
     def encrypt(self, data: str, dest_ip: str) -> Packet:
         """
