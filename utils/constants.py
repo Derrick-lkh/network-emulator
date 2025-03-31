@@ -1,24 +1,23 @@
 
 PROTOCOL_MAPPING = {
-    # "0": "ARP_REQUEST",
-    # "1": "ARP_REPLY",
-    # "2": "ICMP_REQUEST",
-    # "3": "ICMP_REPLY",
-    # "4": "TCPDATA"
     "1": "TCPDATA",
-    "2": "ICMP"
+    "2": "ICMP",
+    "3": "VPN",
+    "4": "VPN_AUTH"
 }
 
 PROTOCOL_TYPE = {
     "TCPDATA": "1",
-    "ICMP": "2"
+    "ICMP": "2",
+    "VPN": "3",
+    "VPN_AUTH": "4"
 }
 FRAME_MAPPING = { 
     "A": "ARP",
-    "C": "IPV4"
+    "C": "IPV4",
 }
 
 FRAME_TYPE = {
     "ARP": "A",
-    "IPV4": "C"
+    "IPV4": "C",
 }

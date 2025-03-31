@@ -40,6 +40,9 @@ class Router:
                     print("*" * 50)
                     decoded_frame = Frame.decode(data)
                     print(decoded_frame)
+
+                    # TODO: Add a checker for Packet validation
+                    # only handle Frame with Packet
                     packet = Packet.decode(decoded_frame.data)
                     print(f"[Router] Packet received on {nic_name}: \n{packet}")
                     print("*" * 50)

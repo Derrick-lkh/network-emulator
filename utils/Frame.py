@@ -92,6 +92,7 @@ class Frame:
         return not any(invalid_conditions)
     
     
+    
     def __str__(self):
         """Returns a string representation of the packet."""
         return f"Frame:\n" \

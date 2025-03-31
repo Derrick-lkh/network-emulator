@@ -1,10 +1,12 @@
 from utils.Packet import *
-from cryptography.fernet import Fernet
+from utils.VPN import VPN
+from utils.constants import PROTOCOL_TYPE
+import json
+import zlib
 import base64
 
-
 class VPNClient:
-    def __init__(self, vpn_gateway: str, vnic_ip: str, nic_ip: str, secret: str):
+    def __init__(self, vpn_gateway: str, vnic_ip: str, nic_ip: str):
         """
         Args:
             vpn_gateway (str): IP address of the VPN gateway (e.g., 11.22.33.1)
@@ -16,64 +18,71 @@ class VPNClient:
         self.vpn_gateway = vpn_gateway
         self.vnic_ip = vnic_ip
         self.nic_ip = nic_ip
-        self.cipher = Fernet(
-            base64.urlsafe_b64encode(secret.encode()[:32].ljust(32, b"\0"))
-        )
+        self.vpn_ctrl = VPN()
+        self.username = "user"
+        self.password = "password123"
 
-    def encrypt(self, data: str, dest_ip: str) -> Packet:
+    def get_establish_conn_frame(self) -> Packet:
+        """
+        Hello to vpn server - sends over its ECDH keys
+        """
+        packet_data = self.vpn_ctrl.packet_auth_key_exchange_data()
+        packet = Packet(packet_data, self.nic_ip, self.vpn_gateway, protocol=PROTOCOL_TYPE.get("VPN_AUTH"))
+        return packet
+
+    def generate_shared_secret(self, server_pub) -> Packet:
+        self.vpn_ctrl.generate_shared_secret(server_pub)
+        # Next phase
+        ## password
+        vpn_packet_data = {
+            "message_type": "VPN_AUTH_CRED",
+            "username": self.username,
+            "password": self.password
+        }
+        vpn_packet_data = json.dumps(vpn_packet_data)
+        encrypted_payload = self.encrypt(vpn_packet_data, self.vpn_gateway)
+        return encrypted_payload
+
+    def craft_encrypted_payload(self, data, dest_ip, protocol) -> Packet:
+        """
+        Use for encrypting communications to vpn server
+        """
+        vpn_packet_data = {
+            "message_type": "VPN_PACKET",
+            "data": data
+        }
+        vpn_packet_data = json.dumps(vpn_packet_data)
+        encrypted_payload = self.encrypt(vpn_packet_data, dest_ip, protocol)
+        return encrypted_payload
+
+    def encrypt(self, data: str, dest_ip: str, protocol="0") -> Packet:
         """
         Encrypt the data and create a packet to send to the VPN gateway.
-        Args:
-            data (str): The data to encrypt (e.g., the original IP packet as a string).
-            dest_ip (str): The destination IP chosen by the app.
-        Returns:
-            Packet: The outer packet to be sent to the VPN gateway.
-        Raises:
-            ValueError: If the packet is invalid.
         """
-
-        inner_packet = Packet(data, self.vnic_ip, dest_ip, "4")
-        if not inner_packet.validate_packet():
-            raise ValueError("Invalid packet")
-
-        inner_packet_str = (
-            f"{inner_packet.src_ip}|{inner_packet.dst_ip}|{inner_packet.data}"
-        )
-        encrypted_data = self.cipher.encrypt(inner_packet_str.encode()).decode()
-
-        # Create the outer packet (from real NIC to VPN gateway) with the encrypted data
-        outer_packet = Packet(encrypted_data, self.nic_ip, self.vpn_gateway, "4")
-        if not outer_packet.validate_packet():
-            raise ValueError("Invalid outer packet")
-
-        return outer_packet
+        data_packet = Packet(data, self.vnic_ip, dest_ip, protocol)
+        data_packet_encoded = data_packet.encode()
+        ciphertext, iv, tag = self.vpn_ctrl.encrypt_data(data_packet_encoded)
+        vpn_payload = {
+            "c": f"{ciphertext.hex()}",
+            "iv": f"{iv.hex()}", 
+            "tag": f"{tag.hex()}"
+        }
+        vpn_payload_str = json.dumps(vpn_payload)
+        compressed_data = zlib.compress(vpn_payload_str.encode("utf-8"))
+        encoded_payload = base64.b64encode(compressed_data).decode('utf-8')
+        vpn_packet = Packet(encoded_payload, self.nic_ip, self.vpn_gateway, protocol=PROTOCOL_TYPE.get("VPN"))
+        return vpn_packet
 
     def decrypt(self, packet: Packet) -> Packet:
         """
         Decrypt an incoming packet from the VPN gateway to get the original IP packet.
-        Args:
-            packet (Packet): The packet received from the VPN gateway.
-        Returns:
-            Packet: The decrypted inner packet.
-        Raises:
-            ValueError: If decryption fails or the packet is invalid.
         """
-
-        if not packet.validate_packet():
-            raise ValueError("Invalid incoming packet")
-
-        try:
-            decrypted_data = self.cipher.decrypt(packet.data.encode()).decode()
-        except Exception as e:
-            raise ValueError(f"Decryption failed: {str(e)}")
-
-        try:
-            src_ip, dst_ip, original_data = decrypted_data.split("|", 2)
-        except ValueError:
-            raise ValueError("Invalid decrypted packet format")
-
-        inner_packet = Packet(original_data, src_ip, dst_ip, "4")
-        if not inner_packet.validate_packet():
-            raise ValueError("Invalid decrypted inner packet")
-
-        return inner_packet
+        encoded_payload = packet.data
+        decoded_payload = base64.b64decode(encoded_payload)
+        decompressed_payload = zlib.decompress(decoded_payload).decode('utf-8')
+        vpn_payload_retrieved = json.loads(decompressed_payload)
+        payload_cipher = vpn_payload_retrieved.get("c")
+        payload_iv = vpn_payload_retrieved.get("iv")
+        payload_tag = vpn_payload_retrieved.get("tag")
+        decrypted_packet = self.vpn_ctrl.decrypt_data(payload_cipher, payload_iv, payload_tag)
+        return decrypted_packet

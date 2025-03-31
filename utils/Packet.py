@@ -15,7 +15,11 @@ class Packet:
         src_ip_bytes = int(self.src_ip, 16).to_bytes(1, 'big')
         dest_ip_bytes = int(self.dest_ip, 16).to_bytes(1, 'big')
         # Encoding the data when necessary
-        encoded_data = self.data.encode()
+        encoded_data = self.data
+        if not isinstance(self.data, bytes):
+            print("ENCODING AGAIN")
+            encoded_data = self.data.encode('utf-8')
+        print(self.data_length)
         data_length_bytes = int(self.data_length).to_bytes(1, 'big')
         encode_protocol = int(self.protocol).to_bytes(1, 'big')
         return src_ip_bytes + dest_ip_bytes + encode_protocol + data_length_bytes + encoded_data
@@ -35,16 +39,16 @@ class Packet:
         """
         - IP addresses must be valid hexadecimal strings in range
         - Protocol must be either these values
-            "0" - ARP_REQUEST
-            "1" - ARP_REPLY
-            "2" - ICMP_REQUEST
-            "3" - ICMP_REPLY
-            "4" - TCPDATA
+            "0" - TCPDATA
+            "1" - ICMP
+            "2" - VPN
             
         - Data length must match actual data and be representable in 1 byte
         - Data must be non-empty and encodable
-        """
 
+        TODO: add a checker to ensure data_len is 1 byte (255 max)
+        """
+        
         src_ip_sanitised = int(self.src_ip, 16)
         dest_ip_sanitised = int(self.dest_ip, 16)
         data_len  = int(self.data_length)
