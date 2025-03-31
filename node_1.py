@@ -1,4 +1,5 @@
 from utils.Node import Node
+from utils.NodeInputHandler import NodeInputHandler
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -10,14 +11,7 @@ if __name__ == "__main__":
     ARP_TABLE = {
         "0x11": "R1"
     }
-    spoof_flag = True
-    node = Node(mac="N1", ip="0x1A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE)
+    node = Node(mac="N1", ip="0x1A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, FIREWALL='whitelist')
     node.run()
-
-    while True:
-        dest = input("Enter destination MAC or IP: ")
-        msg = input("Enter message: ")
-        spoof_ip = ""
-        if spoof_flag:
-            spoof_ip = input("Enter ip address to spoof as: ")
-        node.send_TCP_data(dest, msg, spoof_ip)
+    input_handler = NodeInputHandler(node, spoof_flag=True, firewall_flag=True)
+    input_handler.run()

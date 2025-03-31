@@ -79,6 +79,9 @@ class Router:
             print(f"[Router] Forwarding packet for {destination} via via NIC {outgoing_interface}")
             nic = self.nics[outgoing_interface]
             print(nic)
+            if packet.dest_ip == nic.ip:
+                print(f"[Router] Packet is for this router: \n{packet}")
+                return
         packet_encode = packet.encode()
         dest_mac = nic.ARP_TABLE.get(destination, None)
         print(destination)

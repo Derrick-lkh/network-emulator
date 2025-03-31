@@ -37,7 +37,10 @@ class NIC:
             return None
         decoded_packet = Frame.decode(data)
         dest_mac = decoded_packet.dest_mac
-        if dest_mac == self.mac or dest_mac == "FF":  # Broadcast or direct
+        src_mac = decoded_packet.src_mac
+        if dest_mac == self.mac:  # Broadcast or direct
+            return data
+        elif dest_mac == "FF" and src_mac != self.mac:
             return data
         return None
 
