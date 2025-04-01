@@ -11,7 +11,7 @@ if __name__ == "__main__":
     ARP_TABLE = {
         "0x11": "R1"
     }
-    node = Node(mac="N1", ip="0x1A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, FIREWALL='whitelist')
+    node = Node(mac="N1", ip="0x1A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, FIREWALL='blacklist')
     node.run()
-    input_handler = NodeInputHandler(node, spoof_flag=True, firewall_flag=True)
+    input_handler = NodeInputHandler(node, spoof_flag=False , firewall_flag=True)
     input_handler.run()
