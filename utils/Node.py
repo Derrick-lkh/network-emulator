@@ -10,6 +10,7 @@ from utils.constants import PROTOCOL_MAPPING, PROTOCOL_TYPE, FRAME_MAPPING, FRAM
 from utils.VPNClient import *
 from utils.VPNServer import *
 
+import time
 
 class Node:
     """
@@ -38,7 +39,7 @@ class Node:
 
         if not DISABLE_ANNOUNCE:
             self.announce_arp()
-
+        time.sleep(5)
         #################################
         ###            VPN            ###
         #################################

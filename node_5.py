@@ -16,7 +16,7 @@ if __name__ == "__main__":
         "0x2A": "N2",
         "0x2B": "N3"
     }
-    node = Node(mac="N5", ip="0x2D", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, DISABLE_ANNOUNCE=True)
+    node = Node(mac="N5", ip="0x2D", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE)
     time.sleep(2) # Await Node creation complete
     node.run()
     ICMP_IP = input("Enter an IP to ping (e.g. 0x1A): ")

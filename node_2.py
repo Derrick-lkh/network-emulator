@@ -13,7 +13,7 @@ if __name__ == "__main__":
         # "0x2A": "N2",
         "0x2B": "N3"
     }
-    node = Node(mac="N2", ip="0x2A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE)
+    node = Node(mac="N2", ip="0x2A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, FIREWALL='blacklist')
     node.run()
-    input_handler = NodeInputHandler(node, spoof_flag=False, firewall_flag=False)
+    input_handler = NodeInputHandler(node, spoof_flag=False, firewall_flag=True)
     input_handler.run()
