@@ -169,10 +169,8 @@ class Router:
                     return
         print(packet)
         packet_encode = packet.encode()
-        print("check dest here")
-        print(destination)
+
         dest_mac = nic.ARP_TABLE.get(destination, None)
-        print(destination)
         print(dest_mac)
         if dest_mac is None:
             print(

@@ -26,4 +26,7 @@ if __name__ == "__main__":
         ARP_TABLE_2=ARP_TABLE_2,
     )
     router.start()
-    print("[Main] Router is running. Press Ctrl+C to stop.")
+    print("[Main] Router is running. Press Ctrl+C to stop.\n")
+
+    while True:
+        pass
