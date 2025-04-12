@@ -118,6 +118,7 @@ class Node:
         frame_encode = payload_frame.encode()
         self.NIC.send(frame_encode)
         print(f"[Node {self.mac}] Sent to {dest_mac}: {data}")
+        print()
 
     #################################
     ###            ARP            ###
@@ -149,7 +150,7 @@ class Node:
             BC_MAC = self.mac
         # change ARP logic, remove packet
         ARP_REPLY = f"A:{BC_IP}:{BC_MAC}".encode("utf-8")
-        print("Frame set as ", FRAME_TYPE.get("ARP"))
+        print("Frame set as", FRAME_TYPE.get("ARP"))
         ARP_FRAME = Frame(
             self.mac, "FF", ARP_REPLY, frame_type=FRAME_TYPE.get("ARP")
         )  # Broadcast

@@ -23,6 +23,7 @@ class NodeInputHandler:
             }
 
     def run(self):
+        print()
         while True:
             print("Enter the corresponding number:")
             for key, value in self.menu_actions.items():
@@ -35,7 +36,7 @@ class NodeInputHandler:
                     "action"
                 ]()  # Call the corresponding method
             else:
-                print("Invalid option. Please enter a valid number.")
+                print("Invalid option. Please enter a valid number.\n")
 
     def send_message(self):
         dest = input("Enter destination MAC or IP: ").strip()

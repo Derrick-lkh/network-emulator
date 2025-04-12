@@ -18,9 +18,8 @@ class Packet:
         # Encoding the data when necessary
         encoded_data = self.data
         if not isinstance(self.data, bytes):
-            print("ENCODING AGAIN")
             encoded_data = self.data.encode("utf-8")
-        print(self.data_length)
+
         data_length_bytes = int(self.data_length).to_bytes(1, "big")
         encode_protocol = int(self.protocol).to_bytes(1, "big")
         return (
