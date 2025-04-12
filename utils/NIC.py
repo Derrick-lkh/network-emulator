@@ -1,5 +1,4 @@
 import socket
-import threading
 from utils.Packet import *
 from utils.Frame import *
 
@@ -14,21 +13,19 @@ class NIC:
         hub_port - socket connection to the hub
         SNIFF - Optional
         """
-            
-        self.ARP_TABLE = {
-            "0x1A": "N1",
-            "0x1B": "N2",
-            "0x11": "R1"
-        }
+
+        self.ARP_TABLE = {"0x1A": "N1", "0x1B": "N2", "0x11": "R1"}
         if ARP_TABLE:
-            self.ARP_TABLE = ARP_TABLE # Overwrite default ARP table
+            self.ARP_TABLE = ARP_TABLE  # Overwrite default ARP table
         self.mac = mac
         self.ip = ip
         self.gateway_ip = gateway_ip
-        self.hub_addr = (hub_ip, hub_port) # Connection to HUB
+        self.hub_addr = (hub_ip, hub_port)  # Connection to HUB
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect(self.hub_addr)
-        self.client_socket.send(mac.encode("utf-8")) # Encode mac address before sending - populate port mapping table
+        self.client_socket.send(
+            mac.encode("utf-8")
+        )  # Encode mac address before sending - populate port mapping table
         print(f"[Node {self.mac}] Connected to hub at {hub_ip}")
 
     def listen(self):

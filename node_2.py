@@ -2,6 +2,7 @@ from utils.Node import Node
 import os
 from dotenv import load_dotenv
 from utils.NodeInputHandler import NodeInputHandler
+
 load_dotenv()
 
 if __name__ == "__main__":
@@ -11,9 +12,17 @@ if __name__ == "__main__":
     ARP_TABLE = {
         "0x21": "R2",
         # "0x2A": "N2",
-        "0x2B": "N3"
+        "0x2B": "N3",
     }
-    node = Node(mac="N2", ip="0x2A", gateway_ip=GATEWAY, hub_ip=HUB_BASE_IP, hub_port=PORT, ARP_TABLE=ARP_TABLE, FIREWALL='blacklist')
+    node = Node(
+        mac="N2",
+        ip="0x2A",
+        gateway_ip=GATEWAY,
+        hub_ip=HUB_BASE_IP,
+        hub_port=PORT,
+        ARP_TABLE=ARP_TABLE,
+        FIREWALL="blacklist",
+    )
     node.run()
     input_handler = NodeInputHandler(node, spoof_flag=False, firewall_flag=True)
     input_handler.run()

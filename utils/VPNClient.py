@@ -5,6 +5,7 @@ import json
 import zlib
 import base64
 
+
 class VPNClient:
     def __init__(self, vpn_gateway: str, vnic_ip: str, nic_ip: str):
         """
@@ -27,7 +28,12 @@ class VPNClient:
         Hello to vpn server - sends over its ECDH keys
         """
         packet_data = self.vpn_ctrl.packet_auth_key_exchange_data()
-        packet = Packet(packet_data, self.nic_ip, self.vpn_gateway, protocol=PROTOCOL_TYPE.get("VPN_AUTH"))
+        packet = Packet(
+            packet_data,
+            self.nic_ip,
+            self.vpn_gateway,
+            protocol=PROTOCOL_TYPE.get("VPN_AUTH"),
+        )
         return packet
 
     def generate_shared_secret(self, server_pub) -> Packet:
@@ -37,7 +43,7 @@ class VPNClient:
         vpn_packet_data = {
             "message_type": "VPN_AUTH_CRED",
             "username": self.username,
-            "password": self.password
+            "password": self.password,
         }
         vpn_packet_data = json.dumps(vpn_packet_data)
         encrypted_payload = self.encrypt(vpn_packet_data, self.vpn_gateway)
@@ -47,10 +53,7 @@ class VPNClient:
         """
         Use for encrypting communications to vpn server
         """
-        vpn_packet_data = {
-            "message_type": "VPN_PACKET",
-            "data": data
-        }
+        vpn_packet_data = {"message_type": "VPN_PACKET", "data": data}
         vpn_packet_data = json.dumps(vpn_packet_data)
         encrypted_payload = self.encrypt(vpn_packet_data, dest_ip, protocol)
         return encrypted_payload
@@ -64,13 +67,18 @@ class VPNClient:
         ciphertext, iv, tag = self.vpn_ctrl.encrypt_data(data_packet_encoded)
         vpn_payload = {
             "c": f"{ciphertext.hex()}",
-            "iv": f"{iv.hex()}", 
-            "tag": f"{tag.hex()}"
+            "iv": f"{iv.hex()}",
+            "tag": f"{tag.hex()}",
         }
         vpn_payload_str = json.dumps(vpn_payload)
         compressed_data = zlib.compress(vpn_payload_str.encode("utf-8"))
-        encoded_payload = base64.b64encode(compressed_data).decode('utf-8')
-        vpn_packet = Packet(encoded_payload, self.nic_ip, self.vpn_gateway, protocol=PROTOCOL_TYPE.get("VPN"))
+        encoded_payload = base64.b64encode(compressed_data).decode("utf-8")
+        vpn_packet = Packet(
+            encoded_payload,
+            self.nic_ip,
+            self.vpn_gateway,
+            protocol=PROTOCOL_TYPE.get("VPN"),
+        )
         return vpn_packet
 
     def decrypt(self, packet: Packet) -> Packet:
@@ -79,10 +87,12 @@ class VPNClient:
         """
         encoded_payload = packet.data
         decoded_payload = base64.b64decode(encoded_payload)
-        decompressed_payload = zlib.decompress(decoded_payload).decode('utf-8')
+        decompressed_payload = zlib.decompress(decoded_payload).decode("utf-8")
         vpn_payload_retrieved = json.loads(decompressed_payload)
         payload_cipher = vpn_payload_retrieved.get("c")
         payload_iv = vpn_payload_retrieved.get("iv")
         payload_tag = vpn_payload_retrieved.get("tag")
-        decrypted_packet = self.vpn_ctrl.decrypt_data(payload_cipher, payload_iv, payload_tag)
+        decrypted_packet = self.vpn_ctrl.decrypt_data(
+            payload_cipher, payload_iv, payload_tag
+        )
         return decrypted_packet

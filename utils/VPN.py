@@ -7,6 +7,7 @@ import json
 import ast
 import binascii
 
+
 class VPN:
     def __init__(self):
         self.private, self.public, self.public_key_str = self.generate_ECDH_keys()
@@ -20,25 +21,27 @@ class VPN:
         public_key = private_key.public_key()
         party_public_key_str = public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        ).decode('utf-8')
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ).decode("utf-8")
         return private_key, public_key, party_public_key_str
-    
+
     def generate_shared_secret(self, party_public_key_str):
-        party_public_key = serialization.load_pem_public_key(party_public_key_str.encode())
+        party_public_key = serialization.load_pem_public_key(
+            party_public_key_str.encode()
+        )
         print("KEY", party_public_key)
-        shared_secret  = self.private.exchange(ec.ECDH(), party_public_key)
+        shared_secret = self.private.exchange(ec.ECDH(), party_public_key)
         self.shared_secret = shared_secret
         self.derive_encryption_key(shared_secret)
-        return shared_secret 
-    
+        return shared_secret
+
     def derive_encryption_key(self, shared_secret):
         # Deriving a symmetric encryption key from the shared secret
         hkdf = HKDF(
             algorithm=hashes.SHA256(),
             length=32,  # 32 bytes = 256-bit key for AES-256
             salt=None,  # Optional: Can use a known salt for extra security
-            info=b'handshake data',  # Context-specific identifier
+            info=b"handshake data",  # Context-specific identifier
         )
 
         encryption_key = hkdf.derive(shared_secret)  # Final encryption key
@@ -99,7 +102,9 @@ class VPN:
         try:
             # Decrypt the ciphertext
             plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-            print(f"🛡️ Decrypted Message: {plaintext.decode()}")  # Assuming the plaintext was originally a UTF-8 string
+            print(
+                f"🛡️ Decrypted Message: {plaintext.decode()}"
+            )  # Assuming the plaintext was originally a UTF-8 string
             return plaintext
         except Exception as e:
             print(f"❌ Decryption failed: {str(e)}")
@@ -108,10 +113,11 @@ class VPN:
     ## Generate packet data
     def packet_auth_key_exchange_data(self):
         data = {
-        "message_type": "VPN_AUTH_KEY_EXCHANGE",
-        "public_key": f"{self.public_key_str}"
+            "message_type": "VPN_AUTH_KEY_EXCHANGE",
+            "public_key": f"{self.public_key_str}",
         }
         return json.dumps(data)
+
 
 def main():
     clientVPN = VPN()
@@ -148,7 +154,6 @@ def main():
     # ciphertext, iv, tag = clientVPN.encrypt_data("hello")
     # print(ciphertext, iv, tag)
 
-
     ## SERVER SIDE
     server_pub_packet_decode = json.loads(client_pub_packet)
     server_pub = server_pub_packet_decode.get("public_key")
@@ -160,23 +165,20 @@ def main():
     message_data = json.loads(cipher_message_str)
     print(message_data)
     # message_type = message_data['message_type']
-    nonce_str = message_data['Nonce']
-    ciphertext_str = message_data['Ciphertext']
-    auth_tag_str = message_data['AuthTag']
+    nonce_str = message_data["Nonce"]
+    ciphertext_str = message_data["Ciphertext"]
+    auth_tag_str = message_data["AuthTag"]
     import ast
+
     nonce = ast.literal_eval(nonce_str)
     ciphertext = ast.literal_eval(ciphertext_str)
     auth_tag = ast.literal_eval(auth_tag_str)
-
 
     decrypted_msg = serverVPN.decrypt_data(ciphertext, nonce, auth_tag)
     print(decrypted_msg)
 
     # shared_c = clientVPN.generate_shared_secret(server_pub)
     # shared_s = serverVPN.generate_shared_secret(client_pub)
-
-
-    pass
 
 
 if __name__ == "__main__":
