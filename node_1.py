@@ -1,7 +1,9 @@
 from utils.Node import Node
-from utils.NodeInputHandler import NodeInputHandler
 import os
 from dotenv import load_dotenv
+from utils.NodeInputHandler import NodeInputHandler
+from utils.Enums import Mode
+
 
 load_dotenv()
 
@@ -17,7 +19,7 @@ if __name__ == "__main__":
         hub_ip=HUB_BASE_IP,
         hub_port=PORT,
         ARP_TABLE=ARP_TABLE,
-        FIREWALL="blacklist",
+        FIREWALL=Mode.BLACKLIST,
     )
     node.run()
     input_handler = NodeInputHandler(node, spoof_flag=False, firewall_flag=True)

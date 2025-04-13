@@ -383,7 +383,7 @@ class Node:
                         packet = Packet.decode(frame_data)
                         packet_src = packet.src_ip
                         if self.firewall and not self.firewall.check_packet(packet):
-                            print(f"Blocked packet from {packet_src}")
+                            print(f"[Firewall] Blocked packet from {packet_src}")
                             continue  # skip blocked packet
                         protocol = packet.protocol
                         # Node Application Logic
@@ -396,8 +396,9 @@ class Node:
                         elif PROTOCOL_NAME == "ICMP":
                             ICMP_TYPE = packet.data
                             if ICMP_TYPE == "A":  ## Answer
-                                print(f"{src_mac} Replied to your ICMP")
+                                print(f"[ICMP] Ping Reply received from {packet.src_ip}")
                             elif ICMP_TYPE == "R":  ## Request
+                                print(f"[ICMP] Ping received from {packet.src_ip}")
                                 ICMP_REPLY = f"A"
                                 ICMP_PACKET = Packet(
                                     ICMP_REPLY,

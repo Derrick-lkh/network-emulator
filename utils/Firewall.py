@@ -12,8 +12,9 @@ class Firewall:
         self.mode = mode  # Mode can be 'whitelist' or 'blacklist'
         separator = "*" * 50
         print(separator)
-        print(f"Firewall is initialised as {self.mode}")
+        print(f"Firewall is initialised as {self.mode.value}")
         print(separator)
+        print()
 
     def add_ip_rule(self, ip, action):
         """
@@ -26,7 +27,7 @@ class Firewall:
             print("Invalid IP format, please try again.")
             return
         self.rules.insert(0, {"ip": ip, "action": action})
-        print(f"Added IP rule: {ip} -> {action}")
+        print(f"Added IP rule: {ip} -> {action.value}")
 
     def add_network_rule(self, network, action):
         """
@@ -39,7 +40,7 @@ class Firewall:
             print("Invalid Network format, please try again.")
             return
         self.rules.insert(0, {"network": network, "action": action})
-        print(f"Added Network rule: {network} -> {action}")
+        print(f"Added Network rule: {network} -> {action.value}")
 
     def remove_rule_by_index(self, index):
         if 0 <= index < len(self.rules):
@@ -69,7 +70,6 @@ class Firewall:
                         return False  # Block the packet
                     elif rule["action"] == Action.ALLOW:
                         return True  # Allow the packet
-
         return self.mode == Mode.BLACKLIST  # allow all if blacklist, else reject all
 
     def display_rules(self):
@@ -79,7 +79,11 @@ class Firewall:
         print("\nFirewall Rules:")
         if self.rules:
             for index, rule in enumerate(self.rules):
-                print(f"{index}: {rule}")
+                action_value = rule['action'].value 
+                if 'ip' in rule:
+                    print(f"{index}: {{'ip': '{rule['ip']}', 'action': '{action_value}'}}")    
+                else:
+                    print(f"{index}: {{'network': '{rule['network']}', 'action': '{action_value}'}}")            
             print("\n")
         else:
             print("No rules currently.\n")
