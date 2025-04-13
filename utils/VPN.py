@@ -29,7 +29,7 @@ class VPN:
         party_public_key = serialization.load_pem_public_key(
             party_public_key_str.encode()
         )
-        print("KEY", party_public_key)
+        # print("KEY", party_public_key)
         shared_secret = self.private.exchange(ec.ECDH(), party_public_key)
         self.shared_secret = shared_secret
         self.derive_encryption_key(shared_secret)
@@ -73,11 +73,11 @@ class VPN:
 
         # Authentication tag (generated with GCM mode)
         tag = encryptor.tag
-
-        print(f"🔐 Encrypted Message: {ciphertext.hex()}")
-        print(f"📌 IV: {iv.hex()}")
-        print(f"✅ Authentication Tag: {tag.hex()}")
-
+        print("\t********* ENCRYPT *********")
+        print(f"\t🔐 Encrypted Message: {ciphertext.hex()}")
+        print(f"\t📌 IV: {iv.hex()}")
+        print(f"\t✅ Authentication Tag: {tag.hex()}")
+        print("\t***************************")
         # Return ciphertext, IV, and tag for later use (decryption)
         return ciphertext, iv, tag
 
@@ -103,7 +103,7 @@ class VPN:
             # Decrypt the ciphertext
             plaintext = decryptor.update(ciphertext) + decryptor.finalize()
             print(
-                f"🛡️ Decrypted Message: {plaintext.decode()}"
+                f"\n\t🛡️ Decrypted Message: {plaintext.decode()}\n"
             )  # Assuming the plaintext was originally a UTF-8 string
             return plaintext
         except Exception as e:
