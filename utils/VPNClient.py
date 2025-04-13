@@ -37,6 +37,7 @@ class VPNClient:
         return packet
 
     def generate_shared_secret(self, server_pub) -> Packet:
+        print("🔗 [VPN 3/4] Generating shared key with Server's public key")
         self.vpn_ctrl.generate_shared_secret(server_pub)
         # Next phase
         ## password
