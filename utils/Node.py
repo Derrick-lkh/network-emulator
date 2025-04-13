@@ -78,7 +78,7 @@ class Node:
             print("Now running on VPN Server mode")
             threading.Thread(target=self.vpn_listen, daemon=True).start()
         else:
-            print("Now listening")
+            print("Now listening...")
             threading.Thread(target=self.listen, daemon=True).start()
 
     #################################
@@ -117,6 +117,7 @@ class Node:
         payload_frame = Frame(self.mac, dest_mac, packet_encode)
         frame_encode = payload_frame.encode()
         self.NIC.send(frame_encode)
+        print()
         print(f"[Node {self.mac}] Sent to {dest_mac}: {data}")
         print()
 
@@ -132,7 +133,7 @@ class Node:
         )  # ARP TYPE
         frame_encode = payload_frame.encode()
         self.NIC.send(frame_encode)
-        print(f"[Node {self.mac}] Sent to {dest_mac}: ARP request for {IP_REQUEST}")
+        print(f"[ARP] {self.mac} Sent to {dest_mac}: ARP request for {IP_REQUEST}")
 
     def send_arp_reply(self, arp_ip, arp_mac, target_src_mac):
         ARP_REPLY = f"A:{arp_ip}:{arp_mac}".encode("utf-8")
@@ -150,7 +151,7 @@ class Node:
             BC_MAC = self.mac
         # change ARP logic, remove packet
         ARP_REPLY = f"A:{BC_IP}:{BC_MAC}".encode("utf-8")
-        print("Frame set as", FRAME_TYPE.get("ARP"))
+        print(f"[ARP] Frame set as", FRAME_TYPE.get("ARP"))
         ARP_FRAME = Frame(
             self.mac, "FF", ARP_REPLY, frame_type=FRAME_TYPE.get("ARP")
         )  # Broadcast
@@ -188,9 +189,9 @@ class Node:
             try:
                 data = self.NIC.listen()  # Application layer sniff
                 if data:
-                    decoded_packet = Frame.decode(data)
-                    frame_type = decoded_packet.frame_type
-                    frame_data = decoded_packet.data
+                    decoded_frame = Frame.decode(data)
+                    frame_type = decoded_frame.frame_type
+                    frame_data = decoded_frame.data
                     FRAME_NAME = FRAME_MAPPING.get(frame_type, None)
                     if FRAME_NAME == "IPV4":
                         packet = Packet.decode(frame_data)
@@ -200,9 +201,9 @@ class Node:
                         PROTOCOL_NAME = PROTOCOL_MAPPING.get(protocol, None)
                         ## Newly added for VPN - copy paste to listen later
                         if PROTOCOL_NAME == "VPN_AUTH":
-                            self.handle_VPN_connection(decoded_packet, packet)
+                            self.handle_VPN_connection(decoded_frame, packet)
                         elif PROTOCOL_NAME == "VPN":
-                            self.handle_VPN_packets(decoded_packet, packet)
+                            self.handle_VPN_packets(decoded_frame, packet)
                         elif PROTOCOL_NAME == "TCPDATA":
                             dest_ip = packet.dest_ip
                             connected_client = self.server_VPN.get_client_ip_mapping(
@@ -370,14 +371,13 @@ class Node:
                 data = self.NIC.listen()  # Application layer sniff
                 if data:
                     # Decode
-                    decoded_packet = Frame.decode(data)
-                    # print(decoded_packet)
-
-                    src_mac = decoded_packet.src_mac
-                    frame_type = decoded_packet.frame_type
-                    frame_data = decoded_packet.data
+                    decoded_frame = Frame.decode(data)
+                    print(f"[Node {self.mac}] Frame received from {decoded_frame.src_mac}: \n{decoded_frame}\n")
+                    src_mac = decoded_frame.src_mac
+                    frame_type = decoded_frame.frame_type
+                    frame_data = decoded_frame.data
                     FRAME_NAME = FRAME_MAPPING.get(frame_type, None)
-                    print(f"\nFRAME RECEIVED {FRAME_NAME}")
+                    # print(f"\nFRAME RECEIVED {FRAME_NAME}")
                     if FRAME_NAME == "IPV4":
                         # ICMP or TCPDATA (MESSAGE)
                         packet = Packet.decode(frame_data)
@@ -388,11 +388,13 @@ class Node:
                         protocol = packet.protocol
                         # Node Application Logic
                         # Configure logic for ARP Response
+                        print(f"[Node {self.mac}] Packet received from {packet.src_ip}: \n{packet}")
+                        print()
                         PROTOCOL_NAME = PROTOCOL_MAPPING.get(protocol, None)
                         if PROTOCOL_NAME == "TCPDATA":
-                            print("Incoming TCP Data")
-                            print(packet)
-                        #
+                            print(f"[TCP] Message received from {packet.src_ip}: {packet.data}")
+                            print()
+                        
                         elif PROTOCOL_NAME == "ICMP":
                             ICMP_TYPE = packet.data
                             if ICMP_TYPE == "A":  ## Answer
@@ -485,8 +487,8 @@ class Node:
                         # Craft ARP response packet
                         decoded_frame_data = frame_data.decode("utf-8")
                         ARP_TYPE = decoded_frame_data[0]
-
-                        print(f"ARP PACKET {ARP_TYPE}")
+                        print()
+                        print(f"[ARP] ARP PACKET {ARP_TYPE} received on {self.mac}")
                         if ARP_TYPE == "R":  # Incoming req
                             ## REQUEST
                             _, ARP_IP = decoded_frame_data.split(":")
@@ -497,13 +499,14 @@ class Node:
                             _, ARP_IP, ARP_MAC = decoded_frame_data.split(":")
                             # Validate IP and MAC
                             self.NIC.update_ARP_table(ARP_IP, ARP_MAC)
+                            print(f"[ARP] Updated ARP Table on {self.mac}", self.NIC.ARP_TABLE)
                             print()
-                            print("Updated ARP", self.NIC.ARP_TABLE)
             except:
                 break
 
     def sniff(self):  # For attacker
-        print("Sniffing mode on")
+        print("Sniffing mode on...")
+        print()
         while True:
             try:
                 # Takes control of NIC Listening - for attack/ sniffing
@@ -511,8 +514,18 @@ class Node:
                 if not data:
                     break
                 # Decode
-                decoded_packet = Frame.decode(data)
-                packet = Packet.decode(decoded_packet.data)
-                print(packet)
+                decoded_frame = Frame.decode(data)
+                frame_type = decoded_frame.frame_type
+                frame_data = decoded_frame.data
+                print("[SNIFFED]")
+                print(decoded_frame)
+                print()
+                FRAME_NAME = FRAME_MAPPING.get(frame_type, None)
+                if FRAME_NAME == "IPV4":
+                    packet = Packet.decode(frame_data)
+                    print("[SNIFFED]")
+                    print(packet)
+                    print()
+
             except:
                 break

@@ -46,7 +46,7 @@ class NodeInputHandler:
             for key, value in self.menu_actions.items():
                 print(f"{key}. {value['msg']}")
 
-            menu_action = input("Your choice: ").strip()
+            menu_action = input("Input your choice below: \n").strip()
 
             if menu_action in self.menu_actions:
                 self.menu_actions[menu_action][
@@ -60,7 +60,7 @@ class NodeInputHandler:
         print("Enter the corresponding number:")
         for key, value in self.ping_actions.items():
             print(f"{key}. {value}")
-        ping_action = input("Your choice: ")
+        ping_action = input("Input your choice below: \n").strip()
         if ping_action in self.ping_actions:
             if ping_action == "1":
                 self.node.send_icmp_request(icmp_ip)
@@ -96,7 +96,7 @@ class NodeInputHandler:
             for key, value in self.firewall_actions.items():
                 print(f"{key}. {value}")
 
-            firewall_action = input("Your choice: ")
+            firewall_action = input("Input your choice below: \n").strip()
             if firewall_action in self.firewall_actions:
                 if firewall_action in ["1", "2"]:
                     src_prompt = "Enter source IP to allow/block: " if firewall_action == "1" else "Enter source Network to allow/block: "
@@ -105,7 +105,7 @@ class NodeInputHandler:
                     for key, value in self.rule_actions.items():
                         print(f"{key}. {value['msg']}")
 
-                    rule_action = input("Your choice: ").strip()
+                    rule_action = input("Input your choice below: \n").strip()
                     if rule_action in self.rule_actions:
                         action = self.rule_actions[rule_action]["action"] 
                     else:
