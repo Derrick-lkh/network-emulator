@@ -62,12 +62,13 @@ class Node:
 
             # Craft Frame
             router_mac = self.get_mac(self.gateway_ip)
-            print(router_mac)
+
             conn_frame = Frame(
                 self.mac, router_mac, packet_encoded, frame_type=FRAME_TYPE.get("IPV4")
             )
             frame_encoded = conn_frame.encode()
-            print(Frame.decode(frame_encoded))
+            print("🔗 [VPN 1/4] Establishing Key Exchange with VPN Server - Sending Client's Public Key")
+            # print(Frame.decode(frame_encoded))
             # Sending to server
             self.NIC.send(frame_encoded)
 
@@ -75,10 +76,10 @@ class Node:
         if self.SNIFF or RUN_IN_SNIFF:
             self.sniff()
         elif VPN_SERVER:
-            print("Now running on VPN Server mode")
+            print("🛡️ Now running on VPN Server mode")
             threading.Thread(target=self.vpn_listen, daemon=True).start()
         else:
-            print("Now listening")
+            # print("Now listening")
             threading.Thread(target=self.listen, daemon=True).start()
 
     #################################
@@ -150,11 +151,11 @@ class Node:
             BC_MAC = self.mac
         # change ARP logic, remove packet
         ARP_REPLY = f"A:{BC_IP}:{BC_MAC}".encode("utf-8")
-        print("Frame set as", FRAME_TYPE.get("ARP"))
         ARP_FRAME = Frame(
             self.mac, "FF", ARP_REPLY, frame_type=FRAME_TYPE.get("ARP")
         )  # Broadcast
         frame_encode = ARP_FRAME.encode()
+        print(f"📢 ARP Broadcast: {BC_IP} MAC identifier at {BC_MAC}")
         self.NIC.send(frame_encode)  # Send out ARP Response
 
     #################################
@@ -196,7 +197,6 @@ class Node:
                         packet = Packet.decode(frame_data)
                         protocol = packet.protocol
 
-                        print(packet)
                         PROTOCOL_NAME = PROTOCOL_MAPPING.get(protocol, None)
                         ## Newly added for VPN - copy paste to listen later
                         if PROTOCOL_NAME == "VPN_AUTH":
@@ -238,19 +238,19 @@ class Node:
                 break
 
     def handle_VPN_connection(self, frame: Frame, packet: Packet):
-        print("Handling VPN Incoming")
-        print(frame)
-        print(packet)
+        # print(frame)
+        # print(packet)
         src_ip = packet.src_ip
         data_json = json.loads(packet.data)
         VPN_message_type = data_json.get("message_type")
-
+        print(f"⚡ [VPN 1/4] Incoming client establishing handshake from {src_ip}!")
+        
         if VPN_message_type == "VPN_AUTH_KEY_EXCHANGE":
             client_pub = data_json.get("public_key")
             # print(f"Public key: {client_pub}")
             client_ip = packet.src_ip
             server_pub = self.server_VPN.establish_conn(client_ip, client_pub)
-
+            print(f"⚡ [VPN 2/4] Unique key pair generated for {src_ip}!")
             conn_packet = Packet(
                 server_pub,
                 self.NIC.ip,
@@ -267,9 +267,10 @@ class Node:
                 conn_packet_encoded,
                 frame_type=FRAME_TYPE.get("IPV4"),
             )
-            print()
-            print("Sending frame")
-            print(conn_frame)
+            # print()
+            # print("Sending frame")
+            # print(conn_frame)
+            print(f"⚡ [VPN 3/4] Sending public key to {src_ip}!")
             conn_frame_encoded = conn_frame.encode()
             self.NIC.send(conn_frame_encoded)
 
@@ -286,9 +287,9 @@ class Node:
             - decrypt data payload
             - identify message_type
         """
-        print("Handling VPN Incoming")
-        print(frame)
-        print(packet)
+        # print("Handling VPN Incoming")
+        # print(frame)
+        # print(packet)
         import zlib
         import base64
 
@@ -300,8 +301,8 @@ class Node:
         decompressed_payload = zlib.decompress(decoded_payload).decode("utf-8")
         # # # Convert it back to JSON
         vpn_payload_retrieved = json.loads(decompressed_payload)
-        print(vpn_payload_retrieved)
-
+        # print(vpn_payload_retrieved)
+        print(f"🔔 [VPN] Incoming VPN packet from {client_ip}!")
         # Identify sender
         packet_src = packet.src_ip
         ## Decrypt cyber
@@ -331,9 +332,12 @@ class Node:
                 client_ip, username, password
             )
             if is_auth:
+                print(f"⚡ [VPN 4/4] Authenticate from {client_ip} VPN Connection Success! ✅")
                 client_vnic_ip = client_packet.src_ip
                 self.server_VPN.update_client_ip_mapping(client_vnic_ip, client_ip)
                 self.announce_arp(client_vnic_ip, self.mac)  # announce client
+            else:
+                print(f"⚡ [VPN 4/4] Authenticate from {client_ip} VPN Connection Failed! ❌")
             payload_packet = self.server_VPN.encrypt(
                 client_ip, payload_data, self.ip, self.ip, packet_src
             )
@@ -342,7 +346,9 @@ class Node:
             router_mac = self.get_mac(self.gateway_ip)
             payload_frame = Frame(self.mac, router_mac, payload_packet_encoded)
             payload_frame_encoded = payload_frame.encode()
+
             self.NIC.send(payload_frame_encoded)
+            print(f"🤝 [VPN] VPN connection has been established with {client_ip}!")
         elif message_type == "VPN_PACKET":
             # Authenticated
             # Forward packet to dest
@@ -377,7 +383,6 @@ class Node:
                     frame_type = decoded_packet.frame_type
                     frame_data = decoded_packet.data
                     FRAME_NAME = FRAME_MAPPING.get(frame_type, None)
-                    print(f"\nFRAME RECEIVED {FRAME_NAME}")
                     if FRAME_NAME == "IPV4":
                         # ICMP or TCPDATA (MESSAGE)
                         packet = Packet.decode(frame_data)
@@ -418,8 +423,8 @@ class Node:
                             # Cipher message
                             if self.client_VPN:
                                 # Client Logic
-                                print("packet received")
-                                print(packet)
+                                print("🔗 [VPN 2/4] Establishing Key Exchange with VPN Server - Received Server's Public Key")
+                                # print(packet)
                                 data_json = json.loads(packet.data)
                                 VPN_message_type = data_json.get("message_type")
                                 if VPN_message_type == "VPN_AUTH_KEY_EXCHANGE":
@@ -430,25 +435,25 @@ class Node:
                                             server_pub
                                         )
                                     )
-                                    print(cred_packet)
+                                    # print(cred_packet)
                                     cred_packet_encoded = cred_packet.encode()
 
-                                    print("ENCODED IS ", cred_packet_encoded)
+                                    # print("ENCODED IS ", cred_packet_encoded)
                                     router_mac = self.get_mac(self.gateway_ip)
                                     cred_frame = Frame(
                                         self.mac, router_mac, cred_packet_encoded
                                     )
                                     cred_frame_encoded = cred_frame.encode()
-                                    print("FRAME")
-                                    print(cred_frame)
+                                    # print("FRAME")
+                                    # print(cred_frame)
+                                    print("🔗 [VPN 4/4] Authenticating with VPN Server - Sending encrypted credentials")
                                     self.NIC.send(cred_frame_encoded)
                             else:
                                 # VPN Server LOGIC (INCOMING)
                                 pass
                         elif PROTOCOL_NAME == "VPN":
                             if self.client_VPN:  # Client logic
-                                print("packet received")
-                                print(packet)
+                                # print(packet)
                                 #########################################################
                                 # Decrypt IP packet                                     #
                                 #########################################################
@@ -468,16 +473,16 @@ class Node:
                                 if client_packet_message_type == "VPN_AUTH_CRED":
                                     if client_packet_data.get("status") == "Success":
                                         print(
-                                            "✅ Success! You are authenticated with vpn server. Communications is now encrypted"
+                                            "✅ VPN Handshake Success! You are authenticated with VPN server. Communications is now encrypted!"
                                         )
                                     else:
                                         print(
-                                            "Auth Failed! Creds error, authentication with server failed."
+                                            "❌ Auth Failed! Credentials error, authentication with server failed."
                                         )
                                 elif client_packet_message_type == "VPN_PACKET":
                                     print(client_packet)
                                     print(
-                                        "✅ Decrypted message: ",
+                                        "💬🔐 VPN Decrypted message: ",
                                         client_packet_data.get("data"),
                                     )
                     # Move to data layer

@@ -28,3 +28,5 @@ if __name__ == "__main__":
         server_vpn=VPN_server,
     )
     node.run(VPN_SERVER=True)
+    while True:
+        pass

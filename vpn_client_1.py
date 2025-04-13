@@ -3,6 +3,7 @@ from utils.VPNClient import *
 import os
 from dotenv import load_dotenv
 from utils.NodeInputHandler import NodeInputHandler
+import time
 
 load_dotenv()
 
@@ -25,4 +26,5 @@ if __name__ == "__main__":
     )
     node.run()
     input_handler = NodeInputHandler(node, spoof_flag=False, firewall_flag=False)
+    time.sleep(8)
     input_handler.run()

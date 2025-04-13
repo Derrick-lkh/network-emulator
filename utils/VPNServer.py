@@ -70,7 +70,7 @@ class VPNServer:
         if VPN_CTRL is None:
             return None
         data_packet = Packet(data, src_ip, dest_ip, protocol)
-        print(data_packet)
+        # print(data_packet)
 
         data_packet_encoded = data_packet.encode()
         ciphertext, iv, tag = VPN_CTRL.encrypt_data(data_packet_encoded)
