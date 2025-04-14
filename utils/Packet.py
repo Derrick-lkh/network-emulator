@@ -77,13 +77,14 @@ class Packet:
     def __str__(self):
         """Returns a string representation of the packet."""
         return (
-            f"Packet:\n"
-            f"  Source IP: {self.src_ip}\n"
-            f"  Destination IP: {self.dest_ip}\n"
-            f"  Protocol: {self.protocol}\n"
-            f"  Data Length: {self.data_length}\n"
-            f"  Data: {self.data}"
+f"""
+📦 Packet
+├─ 🌐 Src: {self.src_ip}\t\t🎯 Dst: {self.dest_ip}
+├─ 📡 Proto: {PROTOCOL_MAPPING.get(self.protocol)}\t\t📏 Len: {self.data_length}
+└─ 📝 Data: {self.data}
+"""
         )
+
 
 
 def main():

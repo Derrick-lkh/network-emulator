@@ -14,7 +14,9 @@ if __name__ == "__main__":
     ARP_TABLE = {
         "0x11": "R1",
     }
-    client_VPN = VPNClient("0x2E", "0x2F", "0x1B")
+    vpn_user = "user"
+    vpn_pass = "password123"
+    client_VPN = VPNClient("0x2E", "0x2F", "0x1B", vpn_user, vpn_pass)
     node = Node(
         mac="N7",
         ip="0x1B",

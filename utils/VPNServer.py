@@ -47,6 +47,9 @@ class VPNServer:
     def update_client_ip_mapping(self, client_vnic_ip, client_pub_ip):
         self.client_ip_mapping[client_vnic_ip] = client_pub_ip
 
+    def remove_client_ip_mapping(self, client_vnic_ip):
+        self.client_ip_mapping.pop(client_vnic_ip, None)
+        
     def auth_user_creds(self, client_ip, username, password) -> str:
         # Craft auth status packet
         auth_status = "Fail"

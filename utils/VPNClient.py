@@ -7,7 +7,7 @@ import base64
 
 
 class VPNClient:
-    def __init__(self, vpn_gateway: str, vnic_ip: str, nic_ip: str):
+    def __init__(self, vpn_gateway: str, vnic_ip: str, nic_ip: str, username: str, password: str):
         """
         Args:
             vpn_gateway (str): IP address of the VPN gateway (e.g., 11.22.33.1)
@@ -20,8 +20,8 @@ class VPNClient:
         self.vnic_ip = vnic_ip
         self.nic_ip = nic_ip
         self.vpn_ctrl = VPN()
-        self.username = "user"
-        self.password = "password123"
+        self.username = username
+        self.password = password
 
     def get_establish_conn_frame(self) -> Packet:
         """
