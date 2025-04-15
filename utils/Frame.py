@@ -1,9 +1,6 @@
-if __name__ == "__main__":
-    from Packet import *
-    import os
-    main()
-else:
-    from utils.Packet import *
+from utils.Packet import *
+import os
+from utils.constants import FRAME_MAPPING
 
 """
 Frame Type in Frame (1 byte)
@@ -95,12 +92,14 @@ class Frame:
     
     def __str__(self):
         """Returns a string representation of the packet."""
-        return f"Frame:\n" \
-               f"  Source MAC: {self.src_mac}\n" \
-               f"  Destination MAC: {self.dest_mac}\n" \
-               f"  Data Length: {self.data_length}\n" \
-               f"  Data: {self.data}\n" \
-               f"  Frame Type: {self.frame_type}"
+        return (
+f"""
+🧱 Frame
+├─ 🔄 Src: {self.src_mac}\t\t🎯 Dst: {self.dest_mac}
+├─ 🏷️ Type: {FRAME_MAPPING.get(self.frame_type)}\t\t📏 Len: {self.data_length}
+└─ 📝 Data: {self.data}
+"""
+        )
 
     
 

@@ -119,7 +119,7 @@ class Node:
         frame_encode = payload_frame.encode()
         self.NIC.send(frame_encode)
         print()
-        print(f"[Node {self.mac}] Sent to {dest_mac}: {data}")
+        print(f"[Node {self.mac}] 🚀 Message send to {dest_ip}: {data}")
         print()
 
     #################################
@@ -164,9 +164,14 @@ class Node:
     #################################
     def send_icmp_request(self, target_ip):
         ICMP_Request = f"R"
-        ICMP_PACKET = Packet(
-            ICMP_Request, self.ip, target_ip, protocol=PROTOCOL_TYPE.get("ICMP")
-        )
+        if self.client_VPN:
+            ICMP_PACKET = self.client_VPN.craft_encrypted_payload(
+                ICMP_Request, target_ip, protocol=PROTOCOL_TYPE.get("ICMP")
+            )
+        else:
+            ICMP_PACKET = Packet(
+                ICMP_Request, self.ip, target_ip, protocol=PROTOCOL_TYPE.get("ICMP")
+            )
         dest_mac = self.get_mac(target_ip)
         ICMP_FRAME = Frame(self.mac, dest_mac, ICMP_PACKET.encode())
         frame_encode = ICMP_FRAME.encode()
@@ -204,7 +209,8 @@ class Node:
                             self.handle_VPN_connection(decoded_frame, packet)
                         elif PROTOCOL_NAME == "VPN":
                             self.handle_VPN_packets(decoded_frame, packet)
-                        elif PROTOCOL_NAME == "TCPDATA":
+                        elif PROTOCOL_NAME == "TCPDATA" or PROTOCOL_NAME == "ICMP":
+                            print(packet)
                             dest_ip = packet.dest_ip
                             connected_client = self.server_VPN.get_client_ip_mapping(
                                 dest_ip
@@ -223,7 +229,7 @@ class Node:
                                     packet.src_ip,
                                     packet.dest_ip,
                                     connected_client,
-                                    protocol=packet.protocol,
+                                    protocol=protocol,
                                 )
                                 payload_packet_encoded = payload_packet.encode()
                                 dest_mac = self.NIC.ARP_TABLE.get(self.gateway_ip, None)
@@ -332,13 +338,7 @@ class Node:
             payload_data, is_auth = self.server_VPN.auth_user_creds(
                 client_ip, username, password
             )
-            if is_auth:
-                print(f"⚡ [VPN 4/4] Authenticate from {client_ip} VPN Connection Success! ✅")
-                client_vnic_ip = client_packet.src_ip
-                self.server_VPN.update_client_ip_mapping(client_vnic_ip, client_ip)
-                self.announce_arp(client_vnic_ip, self.mac)  # announce client
-            else:
-                print(f"⚡ [VPN 4/4] Authenticate from {client_ip} VPN Connection Failed! ❌")
+
             payload_packet = self.server_VPN.encrypt(
                 client_ip, payload_data, self.ip, self.ip, packet_src
             )
@@ -349,9 +349,26 @@ class Node:
             payload_frame_encoded = payload_frame.encode()
 
             self.NIC.send(payload_frame_encoded)
-            print(f"🤝 [VPN] VPN connection has been established with {client_ip}!")
+
+
+            client_vnic_ip = client_packet.src_ip
+            if is_auth:
+                print(f"⚡ [VPN 4/4] Authenticate from {client_ip} VPN Connection Success! ✅")
+                self.server_VPN.update_client_ip_mapping(client_vnic_ip, client_ip)
+                self.announce_arp(client_vnic_ip, self.mac)  # announce client
+                print(f"🤝 [VPN] VPN connection has been established with {client_ip}!")
+            else:
+                self.server_VPN.remove_client_ip_mapping(client_vnic_ip)
+                print(f"⚡ [VPN 4/4] Authenticate from {client_ip} VPN Connection Failed! ❌")
+            
         elif message_type == "VPN_PACKET":
             # Authenticated
+            connected_client = self.server_VPN.get_client_ip_mapping(
+                client_packet.src_ip
+            )
+            if not connected_client:
+                print(f"🚩 Unauthenticated Connection from {client_packet.src_ip} - Packet dropped")
+                return
             # Forward packet to dest
             VPN_PACKET_DATA = client_packet_data.get("data")
             fwd_packet = Packet(
@@ -403,9 +420,9 @@ class Node:
                         elif PROTOCOL_NAME == "ICMP":
                             ICMP_TYPE = packet.data
                             if ICMP_TYPE == "A":  ## Answer
-                                print(f"[ICMP] Ping Reply received from {packet.src_ip}")
+                                print(f"[ICMP] ❤️  Ping Reply received from {packet.src_ip}")
                             elif ICMP_TYPE == "R":  ## Request
-                                print(f"[ICMP] Ping received from {packet.src_ip}")
+                                print(f"[ICMP] ❤️  Ping received from {packet.src_ip}")
                                 ICMP_REPLY = f"A"
                                 ICMP_PACKET = Packet(
                                     ICMP_REPLY,
@@ -413,12 +430,13 @@ class Node:
                                     packet_src,
                                     protocol=PROTOCOL_TYPE.get("ICMP"),
                                 )
+                                dest_mac = self.NIC.ARP_TABLE.get(packet_src, None)
                                 ICMP_FRAME = Frame(
-                                    self.mac, src_mac, ICMP_PACKET.encode()
+                                    self.mac, dest_mac, ICMP_PACKET.encode()
                                 )
                                 frame_encode = ICMP_FRAME.encode()
                                 self.NIC.send(frame_encode)  # Send out ICMP Response
-                            pass
+                                print(f"[ICMP] ❤️  Sending ICMP Reply to {packet_src}")
                         elif PROTOCOL_NAME == "VPN_AUTH":
                             # logic to handle VPN packets
                             # Conn exchange keys
@@ -482,11 +500,33 @@ class Node:
                                             "❌ Auth Failed! Credentials error, authentication with server failed."
                                         )
                                 elif client_packet_message_type == "VPN_PACKET":
+                                    protocol = PROTOCOL_MAPPING.get(client_packet.protocol, None)
+                                    vpn_packet_data = client_packet_data.get("data")
                                     print(client_packet)
                                     print(
                                         "💬🔐 VPN Decrypted message: ",
-                                        client_packet_data.get("data"),
+                                        vpn_packet_data
                                     )
+
+                                    if protocol == "ICMP":
+                                        ICMP_TYPE = vpn_packet_data
+                                        if ICMP_TYPE == "A":  ## Answer
+                                            print(f"[ICMP] ❤️  Ping Reply received from {client_packet.src_ip}")
+                                        elif ICMP_TYPE == "R":  ## Request
+                                            print(f"[ICMP] ❤️  Ping received from {client_packet.src_ip}")
+                                            ICMP_REPLY = f"A"
+                                            ICMP_PACKET = self.client_VPN.craft_encrypted_payload(
+                                                ICMP_REPLY, client_packet.src_ip, protocol=client_packet.protocol
+                                            )
+                                            router_mac = self.get_mac(self.gateway_ip)
+                                            ICMP_FRAME = Frame(
+                                                self.mac, router_mac, ICMP_PACKET.encode()
+                                            )
+                                            frame_encode = ICMP_FRAME.encode()
+                                            self.NIC.send(frame_encode)  # Send out ICMP Response
+                                            print(f"❤️  Sending ICMP Reply to {client_packet.src_ip}")
+                                    
+                                    
                     # Move to data layer
                     elif FRAME_NAME == "ARP":
                         # Craft ARP response packet
