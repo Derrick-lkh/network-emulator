@@ -16,9 +16,9 @@ if __name__ == "__main__":
     }
     vpn_user = "user"
     vpn_pass = "password123"
-    client_VPN = VPNClient("0x2E", "0x2F", "0x1B", vpn_user, vpn_pass)
+    client_VPN = VPNClient("0x2D", "0x2E", "0x1B", vpn_user, vpn_pass)
     node = Node(
-        mac="N7",
+        mac="N6",
         ip="0x1B",
         gateway_ip=GATEWAY,
         hub_ip=HUB_BASE_IP,

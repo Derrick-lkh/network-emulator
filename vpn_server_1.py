@@ -19,8 +19,8 @@ if __name__ == "__main__":
     }
     VPN_server = VPNServer()
     node = Node(
-        mac="N6",
-        ip="0x2E",
+        mac="N5",
+        ip="0x2D",
         gateway_ip=GATEWAY,
         hub_ip=HUB_BASE_IP,
         hub_port=PORT,

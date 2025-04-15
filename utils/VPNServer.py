@@ -24,9 +24,8 @@ class VPNServer:
         # self.client_profile = client_profile
         self.client_ip_mapping = {
             # Hard code
-            "0x2F": "0x1B",
+            "0x2E": "0x1B",
         }
-        self.client_arp = {"N5": "0x2E"}
         self.vpn_mapping = {
             # Client IP: VPN()
         }
