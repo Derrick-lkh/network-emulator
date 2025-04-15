@@ -10,8 +10,8 @@ if __name__ == "__main__":
     GATEWAY_1 = os.getenv("HUB_1_GATEWAY", "0x00")
     GATEWAY_2 = os.getenv("HUB_2_GATEWAY", "0x00")
     HUB_BASE_IP = os.getenv("HUB_BASE_IP", "0x00")
-    ARP_TABLE_1 = {"0x1A": "N1", "0x1B": "N7"}
-    ARP_TABLE_2 = {"0x2A": "N2", "0x2B": "N3", "0x2E": "N6"}
+    ARP_TABLE_1 = {"0x1A": "N1", "0x1B": "N6"}
+    ARP_TABLE_2 = {"0x2A": "N2", "0x2B": "N3", "0x2C": "N4", "0x2D": "N5"}
     router = Router(
         PORT_1,
         PORT_2,
