@@ -119,7 +119,10 @@ class Node:
         frame_encode = payload_frame.encode()
         self.NIC.send(frame_encode)
         print()
-        print(f"[Node {self.mac}] 🚀 Message send to {dest_ip}: {data}")
+        print(f"[TCP] 🚀 Message sent to {dest_ip}: {data}")
+        print()
+        print(f"[Node {self.mac}] 🚀 TCP Frame sent: \n", payload_frame)
+        print(f"[Node {self.mac}] 🚀 TCP Packet sent: \n", payload_packet)
         print()
 
     #################################
@@ -134,13 +137,18 @@ class Node:
         )  # ARP TYPE
         frame_encode = payload_frame.encode()
         self.NIC.send(frame_encode)
-        print(f"[ARP] {self.mac} Sent to {dest_mac}: ARP request for {IP_REQUEST}")
+        print(f"[ARP] 🚀 {self.mac} Sent to {dest_mac}: ARP request for {IP_REQUEST}")
+        print(payload_frame)
+        print()
 
     def send_arp_reply(self, arp_ip, arp_mac, target_src_mac):
         ARP_REPLY = f"A:{arp_ip}:{arp_mac}".encode("utf-8")
         ARP_FRAME = Frame(self.mac, target_src_mac, ARP_REPLY, FRAME_TYPE.get("ARP"))
         frame_encode = ARP_FRAME.encode()
         self.NIC.send(frame_encode)  # Send out ARP Response
+        print(f"[Node {self.mac}] 🚀 ARP Reply Sent:")
+        print(ARP_FRAME)
+        print()
 
     def announce_arp(self, BC_IP=False, BC_MAC=False):
         """
@@ -156,7 +164,9 @@ class Node:
             self.mac, "FF", ARP_REPLY, frame_type=FRAME_TYPE.get("ARP")
         )  # Broadcast
         frame_encode = ARP_FRAME.encode()
-        print(f"📢 ARP Broadcast: {BC_IP} MAC identifier at {BC_MAC}")
+        print(f"[ARP] 📢 Broadcast: {BC_IP} MAC identifier at {BC_MAC}")
+        print(ARP_FRAME)
+        print()
         self.NIC.send(frame_encode)  # Send out ARP Response
 
     #################################
@@ -176,6 +186,9 @@ class Node:
         ICMP_FRAME = Frame(self.mac, dest_mac, ICMP_PACKET.encode())
         frame_encode = ICMP_FRAME.encode()
         self.NIC.send(frame_encode)  # Send out ARP Response
+        print(f"[Node {self.mac}] 🚀 ICMP Frame sent: \n", ICMP_FRAME)
+        print(f"[Node {self.mac}] 🚀 ICMP Packet sent: \n", ICMP_PACKET)
+        print()
 
     #################################
     ###   Lookup Dest Mac (ARP)   ###
