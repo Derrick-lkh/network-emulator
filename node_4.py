@@ -33,8 +33,8 @@ if __name__ == "__main__":
     # node.arp_request("0x2A")
 
     while True:
-        input("ARP Poison")
-        node.send_arp_reply("0x2A", "N4", "R2")
+        input("Press Enter to perform ARP Poison!")
+        node.send_arp_reply("0x2A", "N4", "N3")
         # arp_ip, arp_mac = input("\nInput an ARP spoof: (e.g. 0x2A:N4)\t").split(":")
         # target_ip, target_mac = input("\nInput a target: (e.g. 0x2B:N3)\t").split(":")
         # node.send_arp_reply(arp_ip, arp_mac, target_ip, target_mac)

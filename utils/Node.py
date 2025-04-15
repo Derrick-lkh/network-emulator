@@ -424,13 +424,15 @@ class Node:
                             elif ICMP_TYPE == "R":  ## Request
                                 print(f"[ICMP] ❤️  Ping received from {packet.src_ip}")
                                 ICMP_REPLY = f"A"
+                                
                                 ICMP_PACKET = Packet(
                                     ICMP_REPLY,
                                     self.ip,
                                     packet_src,
                                     protocol=PROTOCOL_TYPE.get("ICMP"),
                                 )
-                                dest_mac = self.NIC.ARP_TABLE.get(packet_src, None)
+                                dest_mac = self.get_mac(packet_src)
+                                
                                 ICMP_FRAME = Frame(
                                     self.mac, dest_mac, ICMP_PACKET.encode()
                                 )
