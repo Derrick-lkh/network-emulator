@@ -29,7 +29,10 @@ class VPNServer:
         self.vpn_mapping = {
             # Client IP: VPN()
         }
-        self.credentials = {"user": "password123"}
+        self.credentials = {
+            "user1": "password123",
+            "user2": "password123"
+        }
         self.authenticated = {
             # IP - True/ False
         }
