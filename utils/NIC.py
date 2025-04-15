@@ -51,20 +51,3 @@ class NIC:
     def update_ARP_table(self, arp_ip, arp_mac):
         # Validate IP and MAC
         self.ARP_TABLE[arp_ip] = arp_mac
-
-
-# Sending Packet
-# Packet -> Frame
-# Frame is send over the network (Node to router)
-
-# When it reach router
-# Router checks Frame.dest_addr
-# If Frame.dest_addr == router addr
-# Decapsulate Frame to get IP packet
-# Check IP_dest, encapsulate with the new Mac_addr
-# Send to next addr (Dest_mac_addr)
-
-# Node receives Frame
-# frame.dest_addr == node addr
-# Decapsulate Frame to get IP packet
-# reads Data

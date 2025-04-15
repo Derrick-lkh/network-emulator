@@ -101,25 +101,3 @@ class VPNServer:
         # send over pub key
         packet_data = session_vpn_ctrl.packet_auth_key_exchange_data()
         return packet_data
-
-    # N1 -> VPN 1 (encrypted)
-    # VPN 1 -> N2 (encrypted)
-    #
-
-    # Firewall
-    """
-    RULE:
-    - N3 block all from N2
-
-
-    N1 (VPN CLIENT)
-    N4 (whitelist, accepts only internal packet IPV4), N5 (VPN SERVER)
-    N4 (PASSWORD)
-    N1 -> N4
-
-    # Reply N4 -> N1
-    N4 -> N5
-    --- -- -  N5?
-    N5 -> N1
-
-    """
