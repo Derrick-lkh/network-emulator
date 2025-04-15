@@ -14,12 +14,12 @@ if __name__ == "__main__":
     ARP_TABLE = {
         "0x11": "R1",
     }
-    vpn_user = "user1"
+    vpn_user = "user2"
     vpn_pass = "password123"
-    client_VPN = VPNClient("0x2D", "0x2E", "0x1B", vpn_user, vpn_pass)
+    client_VPN = VPNClient("0x2D", "0x2F", "0x1C", vpn_user, vpn_pass)
     node = Node(
-        mac="N6",
-        ip="0x1B",
+        mac="N7",
+        ip="0x1C",
         gateway_ip=GATEWAY,
         hub_ip=HUB_BASE_IP,
         hub_port=PORT,
