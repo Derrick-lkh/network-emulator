@@ -45,7 +45,10 @@ class Firewall:
     def remove_rule_by_index(self, index):
         if 0 <= index < len(self.rules):
             removed_rule = self.rules.pop(index)
-            print(f"Removed rule: {removed_rule}")
+            if 'ip' in removed_rule:
+                print(f"Removed rule: {{'ip': '{removed_rule['ip']}', 'action': '{removed_rule['action'].value}'}}")    
+            else:
+                print(f"Removed rule: {{'network': '{removed_rule['network']}', 'action': '{removed_rule['action'].value}'}}")    
         else:
             print("Invalid index. No rule removed.")
 

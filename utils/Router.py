@@ -164,7 +164,7 @@ class Router:
 
         else:
             print(
-                f"[Router] Forwarding packet for {destination} via NIC {outgoing_interface}"
+                f"[Router] ⏩ Forwarding packet for {destination} via NIC {outgoing_interface}"
             )
             print()
             nic = self.nics[outgoing_interface]
@@ -179,7 +179,9 @@ class Router:
         payload_frame = Frame(nic.mac, dest_mac, packet_encode)
         frame_encode = payload_frame.encode()
         nic.send(frame_encode)
-        print(f"[Router] {nic.mac} Forwarded frame to {dest_mac}")
+        print(f"[Router] ⏩ {nic.mac} Forwarded frame to {dest_mac}")
+        print(f"[Router] ⏩ Frame forwarded: \n", payload_frame)
+        print(f"[Router] ⏩ Packet forwarded: \n", packet)
         print()
         return
 
@@ -188,3 +190,6 @@ class Router:
         ARP_FRAME = Frame(self.mac, target_src_mac, ARP_REPLY, FRAME_TYPE.get("ARP"))
         frame_encode = ARP_FRAME.encode()
         nic.send(frame_encode)  # Send out ARP Response
+        print(f"[Router] 🚀 ARP Reply Sent:")
+        print(ARP_FRAME)
+        print()
