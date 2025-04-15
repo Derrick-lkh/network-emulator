@@ -24,18 +24,14 @@ if __name__ == "__main__":
         ARP_TABLE=ARP_TABLE,
         DISABLE_ANNOUNCE=True,
     )
-    # node.arp_request("0x2A")
-    # ## Custom ARP attack script
-    # node.send_arp_reply("0x2A", "N4", "0x2A", "FF")
-    # # node.send_arp_reply("0x2A", "N4", "0x2B", "N3")
+
     node.run()
     time.sleep(2)  # Await Node creation complete
-    # node.arp_request("0x2A")
 
     while True:
-        input("Press Enter to perform ARP Poison!")
-        node.send_arp_reply("0x2A", "N4", "N3")
-        # arp_ip, arp_mac = input("\nInput an ARP spoof: (e.g. 0x2A:N4)\t").split(":")
-        # target_ip, target_mac = input("\nInput a target: (e.g. 0x2B:N3)\t").split(":")
-        # node.send_arp_reply(arp_ip, arp_mac, target_ip, target_mac)
+        arp_ip = input("Input the target IP Address for ARP Poisoning: ")
+        target_mac = input("Input the target MAC Address for ARP Poisoning: ")
+        # node.send_arp_reply("0x2A", "N4", "N3")
+        node.send_arp_reply(arp_ip, node.mac, target_mac)
+        print(f"Node {target_mac}'s ARP table is poisoned 💀. {arp_ip}:{node.mac} mapping sent 📬\n")
         pass
