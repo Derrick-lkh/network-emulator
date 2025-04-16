@@ -172,16 +172,21 @@ class Node:
     #################################
     ###          ICMP             ###
     #################################
-    def send_icmp_request(self, target_ip):
+    def send_icmp_request(self, target_ip, spoof_ip=False):
         ICMP_Request = f"R"
         if self.client_VPN:
             ICMP_PACKET = self.client_VPN.craft_encrypted_payload(
                 ICMP_Request, target_ip, protocol=PROTOCOL_TYPE.get("ICMP")
             )
         else:
-            ICMP_PACKET = Packet(
-                ICMP_Request, self.ip, target_ip, protocol=PROTOCOL_TYPE.get("ICMP")
+            if spoof_ip:
+                ICMP_PACKET = Packet(
+                    ICMP_Request, spoof_ip, target_ip, protocol=PROTOCOL_TYPE.get("ICMP")
             )
+            else:
+                ICMP_PACKET = Packet(
+                    ICMP_Request, self.ip, target_ip, protocol=PROTOCOL_TYPE.get("ICMP")
+                )
         dest_mac = self.get_mac(target_ip)
         ICMP_FRAME = Frame(self.mac, dest_mac, ICMP_PACKET.encode())
         frame_encode = ICMP_FRAME.encode()
@@ -452,6 +457,9 @@ class Node:
                                 frame_encode = ICMP_FRAME.encode()
                                 self.NIC.send(frame_encode)  # Send out ICMP Response
                                 print(f"[ICMP] ❤️  Sending ICMP Reply to {packet_src}")
+                                print(f"[Node {self.mac}] 🚀 ICMP Frame sent: \n", ICMP_FRAME)
+                                print(f"[Node {self.mac}] 🚀 ICMP Packet sent: \n", ICMP_PACKET)
+                                print()
                         elif PROTOCOL_NAME == "VPN_AUTH":
                             # logic to handle VPN packets
                             # Conn exchange keys

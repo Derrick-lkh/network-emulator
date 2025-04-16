@@ -61,15 +61,19 @@ class NodeInputHandler:
         for key, value in self.ping_actions.items():
             print(f"{key}. {value}")
         ping_action = input("Input your choice below: \n").strip()
+        if self.spoof_flag:
+            spoof_ip = input("Enter IP address to spoof as: ")
+        else:
+            spoof_ip = ""
         if ping_action in self.ping_actions:
             if ping_action == "1":
-                self.node.send_icmp_request(icmp_ip)
+                self.node.send_icmp_request(icmp_ip, spoof_ip)
             elif ping_action == "2":
                 print("Press Ctrl+C to stop pinging.")
                 try:
                     while True:
                         print("Sending ping...")
-                        self.node.send_icmp_request(icmp_ip)
+                        self.node.send_icmp_request(icmp_ip, spoof_ip)
                         time.sleep(2)
                 except KeyboardInterrupt:
                     print("Stopped pinging.")
