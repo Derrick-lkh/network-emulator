@@ -13,13 +13,13 @@ This project is a simple network emulator written in Python that simulates commu
 ## Network Setup
 
 ### Network 0x1
-- **Hub A** (`hub_1.py`): Runs on `127.0.0.1:5000`
-- **Node 1** (`node_1.py`): IP: `0x1A`, MAC: `AA:BB`
+- **Hub A** (`hub_1.py`): Runs on `127.0.0.1:9000`
+- **Node 1** (`node_1.py`): IP: `0x1A`
 
 ### Network 0x2
-- **Hub B** (`hub_2.py`): Runs on `127.0.0.1:6000`
-- **Node 2** (`node_2.py`): IP: `0x2A`, MAC: `CC:DD`
-- **Node 3** (`node_3.py`): IP: `0x2B`, MAC: `EE:FF`
+- **Hub B** (`hub_2.py`): Runs on `127.0.0.1:9900`
+- **Node 2** (`node_2.py`): IP: `0x2A`
+- **Node 3** (`node_3.py`): IP: `0x2B`
 - **Node 4** (`node_4.py`): Not specified in the original setup but included for completeness.
 
 ### Router
