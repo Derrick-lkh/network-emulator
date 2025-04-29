@@ -4,13 +4,17 @@
 This project is a simple network emulator written in Python that simulates communication between nodes, hubs, and routers. It enables packet transmission, broadcasting within the same network, and routing between different network segments. The emulator is designed to mimic basic networking concepts such as node-to-node communication, broadcasting, and inter-network routing via a router.
 
 ## Features
-- **Node-to-Node Communication**: Nodes within the same network can exchange messages directly.
-- **Broadcasting**: Nodes can broadcast messages to all other nodes in the same network.
-- **Routing**: Facilitates communication between nodes in different networks through a router.
-- **Protocols**: Supports TCPDATA, ICMP and ARP.
-- **VPN Support**: Includes VPN client and server implementations for secure communication (based on `VPN.py`, `VPNClient.py`, `VPNServer.py`).
-- **Firewall Simulation**: Supports basic firewall rules for packet filtering (based on `Firewall.py`).
-- **Attack Simulation**: Supports IP Spoofing, Sniffing and ARP Poisoning. 
+- **🔗 Node-to-Node Communication**: Nodes within the same network can exchange messages directly.
+- **📢 Broadcasting**: Nodes can broadcast messages to all other nodes in the same network.
+- **🧭 Routing**: Facilitates communication between nodes in different networks through a router.
+- **📡 Protocols**: Supports TCPDATA, ICMP and ARP.
+- **🛡️ VPN Support**: Includes VPN client and server implementations for secure communication (based on `VPN.py`, `VPNClient.py`, `VPNServer.py`).
+  - **🛠️ Security Highlights**
+    - 🔑 Hash-based Key Derivation Function (HKDF) for secure shared key generation
+    - 🏛️ Unique Public Key Infrastructure (PKI) setup for each VPN connection
+    - 🧩 Authentication Tags to ensure data integrity and authenticity
+- **🚪 Firewall Simulation**: Supports basic firewall rules for packet filtering (based on `Firewall.py`).
+- **🎭 Attack Simulation**: Supports IP Spoofing, Sniffing and ARP Poisoning. 
 
 ## Network Setup
 <img width="505" alt="Screenshot 2025-04-29 at 11 08 57 AM" src="https://github.com/user-attachments/assets/0e6503a7-3b38-471d-b926-d565d299078d" />
