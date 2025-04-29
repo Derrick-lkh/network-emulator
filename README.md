@@ -117,7 +117,7 @@ This project is a simple network emulator written in Python that simulates commu
 
 ## Usage
 - Each node can send messages to other nodes in the same network directly.
-- Use broadcasting to send messages to all nodes in the same network.
+- ARP Broadcast set up to announce new node joining the network.
 - ARP protocol is configured to allow updates to the ARP table whenever a new node joins the network.
 - The router facilitates communication between Network 0x1 and Network 0x2.
 - Use the VPN server and clients for secure communication between nodes.
