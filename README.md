@@ -66,9 +66,10 @@ This project is a simple network emulator written in Python that simulates commu
    ```bash
    git clone https://github.com/Derrick-lkh/network-emulator.git
    cd network-emulator
+   pip install -r requirements.txt # Install python package
    ```
 
-2. **Set Up Environment** (Optional):
+2. **Set Up Environment**:
    - Copy `env.sample` to `.env`:
      ```bash
      cp env.sample .env
