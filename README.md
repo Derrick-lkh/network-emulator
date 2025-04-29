@@ -7,20 +7,26 @@ This project is a simple network emulator written in Python that simulates commu
 - **Node-to-Node Communication**: Nodes within the same network can exchange messages directly.
 - **Broadcasting**: Nodes can broadcast messages to all other nodes in the same network.
 - **Routing**: Facilitates communication between nodes in different networks through a router.
+- **Protocols**: Supports TCPDATA, ICMP and ARP.
 - **VPN Support**: Includes VPN client and server implementations for secure communication (based on `VPN.py`, `VPNClient.py`, `VPNServer.py`).
 - **Firewall Simulation**: Supports basic firewall rules for packet filtering (based on `Firewall.py`).
+- **Attack Simulation**: Supports IP Spoofing, Sniffing and ARP Poisoning. 
 
 ## Network Setup
+<img width="505" alt="Screenshot 2025-04-29 at 11 08 57 AM" src="https://github.com/user-attachments/assets/0e6503a7-3b38-471d-b926-d565d299078d" />
 
 ### Network 0x1
-- **Hub A** (`hub_1.py`): Runs on `127.0.0.1:9000`
+- **Hub 1** (`hub_1.py`): Runs on `127.0.0.1:9000`
 - **Node 1** (`node_1.py`): IP: `0x1A`
+- **VPN Client 1** (`vpn_client_1.py`): IP: `0x1B`
+- **VPN Client 2** (`vpn_client_2.py`): IP: `0x1C`
 
 ### Network 0x2
-- **Hub B** (`hub_2.py`): Runs on `127.0.0.1:9900`
+- **Hub 2** (`hub_2.py`): Runs on `127.0.0.1:9900`
 - **Node 2** (`node_2.py`): IP: `0x2A`
 - **Node 3** (`node_3.py`): IP: `0x2B`
-- **Node 4** (`node_4.py`): Not specified in the original setup but included for completeness.
+- **Node 4** (`node_4.py`): IP: `0x2C` - set up as an Attacker for ARP Poisoning
+- **VPN Server** (`vpn_server_1.py`): IP: `0x2D`
 
 ### Router
 - **Router** (`router_main.py`):
@@ -48,7 +54,7 @@ This project is a simple network emulator written in Python that simulates commu
 - `router_main.py`: Main script to run the router.
 - `vpn_client_1.py`, `vpn_client_2.py`: Scripts to run VPN clients.
 - `vpn_server_1.py`: Script to run the VPN server.
-- `.env.sample`: Sample environment file for configuration.
+- `env.sample`: Sample environment file for configuration.
 
 ## Setup and Running
 
@@ -59,18 +65,13 @@ This project is a simple network emulator written in Python that simulates commu
    ```
 
 2. **Set Up Environment** (Optional):
-   - Copy `.env.sample` to `.env`:
+   - Copy `env.sample` to `.env`:
      ```bash
-     cp .env.sample .env
+     cp env.sample .env
      ```
    - Edit `.env` if you need to change default configurations (e.g., ports).
 
-3. **Run the Router**:
-   ```bash
-   python router_main.py
-   ```
-
-4. **Run the Hubs**:
+3. **Run the Hubs**:
    - Hub A (Network 0x1):
      ```bash
      python hub_1.py
@@ -80,6 +81,11 @@ This project is a simple network emulator written in Python that simulates commu
      python hub_2.py
      ```
 
+4. **Run the Router**:
+   ```bash
+   python router_main.py
+   ```
+   
 5. **Run the Nodes**:
    - Node 1 (Network 0x1):
      ```bash
@@ -93,12 +99,12 @@ This project is a simple network emulator written in Python that simulates commu
      ```bash
      python node_3.py
      ```
-   - Node 4 (Network 0x2, optional):
+   - Node 4 (Network 0x2):
      ```bash
      python node_4.py
      ```
 
-6. **Run the VPN** (Optional):
+6. **Run the VPN**:
    - Start the VPN Server:
      ```bash
      python vpn_server_1.py
@@ -112,5 +118,10 @@ This project is a simple network emulator written in Python that simulates commu
 ## Usage
 - Each node can send messages to other nodes in the same network directly.
 - Use broadcasting to send messages to all nodes in the same network.
+- ARP protocol is configured to allow updates to the ARP table whenever a new node joins the network.
 - The router facilitates communication between Network 0x1 and Network 0x2.
 - Use the VPN server and clients for secure communication between nodes.
+- To enable spoofing, set **spoof_flag=True** in the NodeInputHandler function parameter of the respective node file.
+- To enable sniffing, set **SNIFF=True** in the Node function parameter of the respective node file.
+- To enable ARP Poisoning, run **node_4.py**.
+- To enable the firewall, set **firewall_flag=True** in the NodeInputHandler function parameter of the respective node file. Additionally, choose your preferred mode by setting **FIREWALL=Mode.BLACKLIST** or **FIREWALL=Mode.WHITELIST** in the Node function parameter.
